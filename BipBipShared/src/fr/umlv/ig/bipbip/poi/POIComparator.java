@@ -14,24 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.poi.defined;
+package fr.umlv.ig.bipbip.poi;
 
-import fr.umlv.ig.bipbip.EventType;
-import fr.umlv.ig.bipbip.poi.SimplePOI;
-import java.util.Date;
+import java.util.Comparator;
 
 /**
- * Represent a radar mobile.
- * 
+ * Class used to compare POI.
+ *
+ * A POI is greater than another one only if its X position and Y position is
+ * higher than the other one.
+ *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class RadarMobile extends SimplePOI {
+public class POIComparator implements Comparator<POI> {
 
-    public RadarMobile(double positionX, double positionY, EventType type) {
-        super(positionX, positionY, EventType.RADAR_MOBILE);
-    }
-
-    public RadarMobile(double positionX, double positionY, Date date) {
-        super(positionX, positionY, EventType.RADAR_MOBILE, date);
+    @Override
+    public int compare(POI o1, POI o2) {
+        if (o1.getX() > o2.getX() && o1.getY() > o2.getY())
+            return 1;
+        else if (o1.equals(o2))
+            return 0;
+        else
+            return -1;
     }
 }

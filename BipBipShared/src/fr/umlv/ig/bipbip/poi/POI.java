@@ -59,5 +59,26 @@ public interface POI {
      *
      * @return The number of confirmations.
      */
-    public int getConfirmations();
+    int getConfirmations();
+    
+    /**
+     * Gets the number of persons that marked this POI not seen.
+     * 
+     * @return The number of refusals.
+     */
+    int getRefusals();
+    
+    /**
+     * Sets the number of confirmations of this POI.
+     * 
+     * @param confirmations The number of confirmations.
+     */
+    void setConfirmations(int confirmations);
+    
+    /**
+     * Sets the number of refusals of this POI.
+     * 
+     * @param refusals The number of refuses.
+     */
+    void setRefusals(int refusals);
 }

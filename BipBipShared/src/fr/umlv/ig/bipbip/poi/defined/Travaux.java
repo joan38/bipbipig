@@ -27,11 +27,11 @@ import java.util.Date;
  */
 public class Travaux extends SimplePOI {
 
-    public Travaux(double positionX, double positionY, EventType type) {
-        super(positionX, positionY, type);
+    public Travaux(double positionX, double positionY) {
+        super(positionX, positionY, EventType.TRAVAUX);
     }
 
-    public Travaux(double positionX, double positionY, EventType type, Date date) {
-        super(positionX, positionY, type, date);
+    public Travaux(double positionX, double positionY, Date date) {
+        super(positionX, positionY, EventType.TRAVAUX, date);
     }
 }

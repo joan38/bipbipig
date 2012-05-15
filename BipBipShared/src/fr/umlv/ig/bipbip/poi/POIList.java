@@ -16,29 +16,34 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
+import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.defined.Divers;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Generic collection of point of interests.
  *
- * The implementation rely on a synchronized sorted map. (No concurrency
+ * The implementation rely on a synchronized sorted set. (No concurrency
  * problem).
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
 public class POIList {
 
-    // TODO: Hum, pas bon l'idée de la SortedMap, trouver peut être une idée 
-    //       à base de matrice.
-    private final SortedMap<Double, ArrayList<POI>> points;
+    private final SortedSet<POI> points;
     private final ConcurrentLinkedDeque<POIListener> listeners;
+    
+    /**
+     * Precision of the searches operations on the POI collection.
+     */
+    public final double precision = 0.5;
 
     /**
      * Create an empty list of POI.
      */
     public POIList() {
-        points = Collections.synchronizedSortedMap(new TreeMap<Double, SortedMap<Double, POI>>());
+        points = Collections.synchronizedSortedSet(new TreeSet<POI>(new POIComparator()));
         listeners = new ConcurrentLinkedDeque<POIListener>();
     }
 
@@ -86,19 +91,91 @@ public class POIList {
         }
     }
 
+    /**
+     * Add simply the point to the collection.
+     *
+     * No checks are made if the point is already present or if there is another
+     * point near the new point.
+     *
+     * @param p POI to add.
+     */
     public void addPOI(POI p) {
-        // Is there is any collisions?
-        // Very low chance to have one, but maybe.
-        ArrayList list = points.get(p.getY());
-        if (list != null) {
-            // Doh, a collision. Well this can happen sometimes even in the double world.
-            list.add(p);
-        } else {
-            points.put(p., list)
-        }
+        points.add(p);
+
+        firePOIAdded(new POIEvent(this, p));
     }
 
+    /**
+     * Remove simply the point from the collection.
+     *
+     * @param p POI to add.
+     */
     public void removePOI(POI p) {
-        // TODO add implementation
+        points.remove(p);
+
+        firePOIRemoved(new POIEvent(this, p));
+    }
+
+    /**
+     * Returns all POI contained between the two designed points.
+     *
+     * @param x1 X position of the first point.
+     * @param y1 Y position of the first point.
+     * @param x2 X position of the second point.
+     * @param y2 Y position of the second point.
+     *
+     * @return A list of all POI contained between those two points.
+     */
+    public SortedSet<POI> getPointsBetween(Double x1, Double y1, Double x2, Double y2) {
+        POI p1 = new DummyPOI(x1, y1, EventType.DIVERS);
+        POI p2 = new DummyPOI(x2, y2, EventType.DIVERS);
+
+        return points.subSet(p1, p2);
+    }
+
+    /**
+     * Looks up POIs at the position x/y.
+     *
+     * As x and y are double, the exacts position cannot be given, so the
+     * nearest POI will be returned instead.
+     *
+     * @param x X position of the point.
+     * @param y Y position of the point.
+     * @param type Type of the POI.
+     *
+     * @return A list of POI found at this position.
+     */
+    public ArrayList<POI> getPOIAt(Double x, Double y, EventType type) {
+        POI p1 = new DummyPOI(x - precision, y - precision, type);
+        POI p2 = new DummyPOI(x + precision, y + precision, type);
+
+        ArrayList<POI> result = new ArrayList<POI>();
+        
+        SortedSet<POI> list = points.subSet(p1, p2);
+        for (POI poi : list) {
+            if (poi.getType().equals(type))
+                result.add(poi);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Gets the points.
+     */
+    protected SortedSet<POI> getPoints() {
+        return points;
+    }
+
+    /**
+     * Dummy POI.
+     *
+     * Used only to make searches operations easier.
+     */
+    private static class DummyPOI extends SimplePOI {
+
+        public DummyPOI(double positionX, double positionY, EventType type) {
+            super(positionX, positionY, type);
+        }
     }
 }

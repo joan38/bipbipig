@@ -29,6 +29,7 @@ public abstract class SimplePOI implements POI {
     private final EventType type;
     private final Date date;
     private int confirmations;
+    private int refusals;
 
     /**
      * Creates a simple point of interest. (POI)
@@ -43,6 +44,9 @@ public abstract class SimplePOI implements POI {
         this.positionY = positionY;
         this.type = type;
         this.date = date;
+
+        this.confirmations = 0;
+        this.refusals = 0;
     }
 
     /**
@@ -87,7 +91,7 @@ public abstract class SimplePOI implements POI {
     public double getX() {
         return positionX;
     }
-    
+
     /**
      * Gets the Y position of the POI.
      *
@@ -99,11 +103,75 @@ public abstract class SimplePOI implements POI {
     }
 
     /**
+     * Gets the number of persons that marked this POI not seen.
+     *
+     * @return The number of refusals.
+     */
+    @Override
+    public int getRefusals() {
+        return refusals;
+    }
+
+    /**
      * Gets the number of confirmations of this POI.
-     * 
+     *
      * @return The number of confirmations.
      */
+    @Override
     public int getConfirmations() {
         return confirmations;
     }
+
+    /**
+     * Sets the number of confirmations of this POI.
+     *
+     * @param confirmations The number of confirmations.
+     */
+    @Override
+    public void setConfirmations(int confirmations) {
+        this.confirmations = confirmations;
+    }
+
+    /**
+     * Sets the number of refusals of this POI.
+     *
+     * @param refusals The number of refuses.
+     */
+    @Override
+    public void setRefusals(int refusals) {
+        this.refusals = refusals;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SimplePOI other = (SimplePOI) obj;
+        if (Double.doubleToLongBits(this.positionX) != Double.doubleToLongBits(other.positionX)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.positionY) != Double.doubleToLongBits(other.positionY)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + (int) (Double.doubleToLongBits(this.positionX) ^ (Double.doubleToLongBits(this.positionX) >>> 32));
+        hash = 79 * hash + (int) (Double.doubleToLongBits(this.positionY) ^ (Double.doubleToLongBits(this.positionY) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "POI, x: "+ positionX +" y: "+ positionY +" date: "+ date +" type: "+ type;
+    }
+    
+    
 }
