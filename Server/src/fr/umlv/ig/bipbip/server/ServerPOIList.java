@@ -17,7 +17,6 @@
 package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIList;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.logging.Level;
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
 public class ServerPOIList extends POIList {
 
     // Debug logger.
-    private static Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPOIList");
+    private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPOIList");
     
     /**
      * After X refusals, delete the POI.
@@ -88,6 +87,7 @@ public class ServerPOIList extends POIList {
             removePOI(poiToUse);
         } else {
             poiToUse.setRefusals(refusals);
+            firePOIUpdated(new POIEvent(this, poiToUse));
         }
 
         // OK.
@@ -116,6 +116,7 @@ public class ServerPOIList extends POIList {
             if (poi.getType().equals(p.getType())) {
                 logger.log(Level.FINE, "Confirmation of {0}", poi);
                 poi.setConfirmations(poi.getConfirmations() + 1);
+                firePOIUpdated(new POIEvent(this, poi));
                 return;
             }
         }
