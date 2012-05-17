@@ -17,6 +17,7 @@
 package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.POIEvent;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.logging.Level;

@@ -18,6 +18,8 @@ package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.EventType;
 import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.POIEvent;
+import fr.umlv.ig.bipbip.poi.POIListener;
 import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
