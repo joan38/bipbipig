@@ -19,9 +19,12 @@ package fr.umlv.ig.bipbip;
 import fr.umlv.ig.bipbip.Event;
 import fr.umlv.ig.bipbip.EventType;
 import fr.umlv.ig.bipbip.NetUtil;
+import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 /**
@@ -46,7 +49,7 @@ public enum ServerCommandHandler {
          * INFO EVENT_TYPE X Y
          */
         @Override
-        public ArrayList<Event> handle(SocketChannel sc, Scanner scanner) throws IOException {
+        public ArrayList<POI> handle(SocketChannel sc, Scanner scanner) throws IOException {
             if (!scanner.hasNextLine()) throw new IOException("Invalid command");
             String line=scanner.nextLine();
             int n;
@@ -58,12 +61,12 @@ public enum ServerCommandHandler {
             } catch (NumberFormatException e) {
                 throw new IOException("Invalid integer value: "+line);
             }
-            ArrayList<Event> list=new ArrayList<Event>();
+            ArrayList<POI> list=new ArrayList<POI>();
             for (int i=0;i<n;i++) {
                 if (!scanner.hasNext() || !scanner.next().equals(ServerCommandHandler.INFO.name())) {
                     throw new IOException("Missing INFO answer");
                 }
-                list.add((Event) ServerCommandHandler.INFO.handle(sc,scanner));
+                list.add((POI) ServerCommandHandler.INFO.handle(sc,scanner));
             }
             return list;
         }
@@ -80,10 +83,12 @@ public enum ServerCommandHandler {
          * where X and Y are double
          */
         @Override
-        public Event handle(SocketChannel sc, Scanner scanner) throws IOException {
+        public POI handle(SocketChannel sc, Scanner scanner) throws IOException {
             if (!scanner.hasNext()) throw new IOException("Invalid command");
+            
             EventType event;
             double x,y;
+            
             try {
                 event=EventType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
@@ -104,7 +109,8 @@ public enum ServerCommandHandler {
             } catch (NumberFormatException e) {
                 throw new IOException("Missing Y coordinate");
             }
-            return new Event(event,x,y);
+            
+            return event.constructPOI(x, y, new Date());
         }
         
     };

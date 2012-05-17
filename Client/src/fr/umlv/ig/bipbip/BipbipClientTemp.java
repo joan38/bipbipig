@@ -1,5 +1,8 @@
 package fr.umlv.ig.bipbip;
 
+import fr.umlv.ig.bipbip.poi.MapPOIModel;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -7,15 +10,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import javax.swing.JFrame;
 
-public class BipbipClient {
+public class BipbipClientTemp {
 
     private final InetSocketAddress server;
     Charset charset = Charset.forName("UTF8");
     private SocketChannel sc;
     private Scanner scanner;
 
-    public BipbipClient(String host, int port) {
+    public BipbipClientTemp(String host, int port) {
         this.server = new InetSocketAddress(host, port);
     }
 
@@ -46,11 +50,12 @@ public class BipbipClient {
         sc.close();
     }
 
-    public static void main(String[] args) throws IOException {
-        BipbipClient client = new BipbipClient("localhost", 6996);
-        client.connect();
-        client.submit(EventType.RADAR_FIXE, 35, 10, new Date());
-        client.submit(EventType.TRAVAUX, 122, -20, new Date());
-        client.getInfo(1, 23);
+    public static void main(String[] args) throws IOException {        
+        
+//        BipbipClient client = new BipbipClient("localhost", 6996);
+//        client.connect();
+//        client.submit(EventType.RADAR_FIXE, 35, 10, new Date());
+//        client.submit(EventType.TRAVAUX, 122, -20, new Date());
+//        client.getInfo(1, 23);
     }
 }

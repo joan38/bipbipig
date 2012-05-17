@@ -16,8 +16,6 @@
  */
 package fr.umlv.ig.bipbip;
 
-import fr.umlv.ig.bipbip.EventType;
-import fr.umlv.ig.bipbip.NetUtil;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
