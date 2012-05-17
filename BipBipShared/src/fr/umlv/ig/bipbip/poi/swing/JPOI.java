@@ -19,6 +19,7 @@ package fr.umlv.ig.bipbip.poi.swing;
 import fr.umlv.ig.bipbip.poi.POI;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import javax.swing.ImageIcon;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
@@ -29,9 +30,10 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class JPOI implements MapMarker{
+public class JPOI implements MapMarker {
 
     private final POI poi;
+    private Rectangle iconArea;
 
     /**
      * Creates a graphical POI displayable on JMapViewer.
@@ -39,6 +41,13 @@ public class JPOI implements MapMarker{
      */
     public JPOI(POI poi) {
         this.poi = poi;
+    }
+
+    /**
+     * Returns the aera position of the icon.
+     */
+    public Rectangle getIconArea() {
+        return iconArea;
     }
 
     /**
@@ -62,10 +71,12 @@ public class JPOI implements MapMarker{
     public void paint(Graphics g, Point position) {
         // Getting the imageIcon.
         ImageIcon img = POIImageFactory.getImage(poi.getType());
+        int imgWidth = img.getIconWidth();
+        int imgHeight = img.getIconHeight();
+        int x = position.x - imgWidth/2;
+        int y = position.y - imgHeight/2;
         
-        // Drawing the POI.
-        g.drawImage(img.getImage(), (int)(position.x - (img.getIconWidth() / 2.0)), (int)(position.y - (img.getIconHeight() / 2.0)), null);
-        
-        // Done.
+        iconArea = new Rectangle(x, y, imgWidth, imgHeight);
+        g.drawImage(img.getImage(), x, y, null);
     }
 }
