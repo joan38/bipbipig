@@ -32,10 +32,10 @@ public class BipbipClient {
     @SuppressWarnings("unchecked")
     public void getInfo(double x, double y) throws IOException {
         ClientCommand.getInfo(sc, x, y);
-        if (!scanner.hasNext() || !scanner.next().equals(ServerCommand.INFOS.name())) {
+        if (!scanner.hasNext() || !scanner.next().equals(ServerCommandHandler.INFOS.name())) {
             throw new IOException("Server did not respond to the GET_INFO query");
         }
-        ArrayList<Event> list = (ArrayList<Event>) ServerCommand.INFOS.handle(sc, scanner);
+        ArrayList<Event> list = (ArrayList<Event>) ServerCommandHandler.INFOS.handle(sc, scanner);
         System.out.println("SERVER: INFOS " + list.size());
         for (Event e : list) {
             System.out.println("SERVER: INFO " + e.getType().name() + " " + x + " " + y);
