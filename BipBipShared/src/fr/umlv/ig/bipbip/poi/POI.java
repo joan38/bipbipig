@@ -16,6 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
+import fr.umlv.ig.bipbip.Event;
 import fr.umlv.ig.bipbip.EventType;
 import java.util.Date;
 
@@ -81,4 +82,11 @@ public interface POI {
      * @param refusals The number of refuses.
      */
     void setRefusals(int refusals);
+    
+    /**
+     * Returns a new event from this POI.
+     * 
+     * @return An event.
+     */
+    Event toEvent();
 }

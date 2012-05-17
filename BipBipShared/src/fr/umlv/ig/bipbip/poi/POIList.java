@@ -32,7 +32,6 @@ public class POIList {
 
     private final SortedSet<POI> points;
     private final ConcurrentLinkedDeque<POIListener> listeners;
-    
     /**
      * Precision of the searches operations on the POI collection.
      */
@@ -149,13 +148,14 @@ public class POIList {
         POI p2 = new DummyPOI(x + precision, y + precision, type);
 
         ArrayList<POI> result = new ArrayList<POI>();
-        
+
         SortedSet<POI> list = points.subSet(p1, p2);
         for (POI poi : list) {
-            if (poi.getType().equals(type))
+            if (poi.getType().equals(type)) {
                 result.add(poi);
+            }
         }
-        
+
         return result;
     }
 

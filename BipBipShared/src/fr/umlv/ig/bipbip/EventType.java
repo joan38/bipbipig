@@ -16,6 +16,10 @@
  */
 package fr.umlv.ig.bipbip;
 
+import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.defined.*;
+import java.util.Date;
+
 /**
  * Type of available events.
  *
@@ -44,5 +48,27 @@ public enum EventType {
      */
     public String getImageName() {
         return imageName;
+    }
+
+    /**
+     * Returns a new POI of the type EventType.
+     *
+     * @return A POI of the type EventType.
+     */
+    public POI constructPOI(double positionX, double positionY, Date date) {
+        switch (this) {
+            case ACCIDENT:
+                return new Accident(positionX, positionY, date);
+            case DIVERS:
+                return new Divers(positionX, positionY, date);
+            case RADAR_FIXE:
+                return new RadarFixe(positionX, positionY, date);
+            case RADAR_MOBILE:
+                return new RadarMobile(positionX, positionY, date);
+            case TRAVAUX:
+                return new Travaux(positionX, positionY, date);
+            default:
+                throw new UnsupportedOperationException("Unknown Event Type.");
+        }
     }
 }

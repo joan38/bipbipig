@@ -27,7 +27,7 @@ import java.util.Date;
  */
 public class RadarMobile extends SimplePOI {
 
-    public RadarMobile(double positionX, double positionY, EventType type) {
+    public RadarMobile(double positionX, double positionY) {
         super(positionX, positionY, EventType.RADAR_MOBILE);
     }
 

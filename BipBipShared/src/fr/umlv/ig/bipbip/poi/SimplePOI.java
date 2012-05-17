@@ -16,6 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
+import fr.umlv.ig.bipbip.Event;
 import fr.umlv.ig.bipbip.EventType;
 import java.util.Date;
 
@@ -142,6 +143,16 @@ public abstract class SimplePOI implements POI {
         this.refusals = refusals;
     }
 
+    /**
+     * Returns a new event from this POI.
+     *
+     * @return An event.
+     */
+    @Override
+    public Event toEvent() {
+        return new Event(type, positionX, positionY);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -170,8 +181,6 @@ public abstract class SimplePOI implements POI {
 
     @Override
     public String toString() {
-        return "POI, x: "+ positionX +" y: "+ positionY +" date: "+ date +" type: "+ type;
+        return "POI, x: " + positionX + " y: " + positionY + " date: " + date + " type: " + type;
     }
-    
-    
 }
