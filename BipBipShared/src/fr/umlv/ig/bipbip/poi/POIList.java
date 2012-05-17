@@ -79,6 +79,17 @@ public class POIList {
     }
 
     /**
+     * Fires the listeners when a POI is modified.
+     *
+     * @param e Event.
+     */
+    protected void firePOIUpdated(POIEvent e) {
+        for (POIListener listener : listeners) {
+            listener.poiUpdated(e);
+        }
+    }
+
+    /**
      * Fires the listeners when a POI is removed.
      *
      * @param e Event.
@@ -162,8 +173,17 @@ public class POIList {
     /**
      * Gets the points.
      */
-    protected SortedSet<POI> getPoints() {
+    public SortedSet<POI> getPoints() {
         return points;
+    }
+
+    /**
+     * Gets the number of POI.
+     *
+     * @return The number of POI.
+     */
+    public int getSize() {
+        return points.size();
     }
 
     /**
