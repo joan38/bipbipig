@@ -73,4 +73,9 @@ public final class JMap extends JMapViewer implements POIListener {
     public void poiRemoved(POIEvent e) {
         removeMapMarker(POItoJPOI.get(e.getPoi()));
     }
+
+    @Override
+    public void poiUpdated(POIEvent e) {
+        repaint();
+    }
 }
