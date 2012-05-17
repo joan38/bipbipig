@@ -17,7 +17,6 @@
 package fr.umlv.ig.bipbip.poi;
 
 import fr.umlv.ig.bipbip.EventType;
-import fr.umlv.ig.bipbip.poi.defined.Divers;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
