@@ -16,11 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.poi.POIType;
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIEvent;
-import fr.umlv.ig.bipbip.poi.POIListener;
-import fr.umlv.ig.bipbip.poi.SimplePOI;
+import fr.umlv.ig.bipbip.poi.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -140,8 +136,8 @@ public class POIList {
      * @return A list of all POI contained between those two points.
      */
     public SortedSet<POI> getPointsBetween(Double x1, Double y1, Double x2, Double y2) {
-        POI p1 = new DummyPOI(x1, y1, POIType.DIVERS);
-        POI p2 = new DummyPOI(x2, y2, POIType.DIVERS);
+        POI p1 = new DummyPOI(x1, y1, POIType.MISCELLANEOUS);
+        POI p2 = new DummyPOI(x2, y2, POIType.MISCELLANEOUS);
 
         return points.subSet(p1, p2);
     }

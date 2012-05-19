@@ -16,9 +16,9 @@
  */
 package fr.umlv.ig.bipbip;
 
-import fr.umlv.ig.bipbip.poi.defined.RadarFixe;
-import fr.umlv.ig.bipbip.poi.defined.RadarMobile;
-import fr.umlv.ig.bipbip.poi.defined.Travaux;
+import fr.umlv.ig.bipbip.poi.defined.FixedSpeedCam;
+import fr.umlv.ig.bipbip.poi.defined.MobileSpeedCam;
+import fr.umlv.ig.bipbip.poi.defined.RoadWorks;
 import fr.umlv.ig.bipbip.server.ClientCommandHandler;
 import fr.umlv.ig.bipbip.server.ServerPOIList;
 import fr.umlv.ig.bipbip.server.gui.ServerJFrame;
@@ -190,9 +190,9 @@ public class BipbipServer {
         server.serve();
         
         // Some dummy points.
-        server.getPoiList().addPOI(new RadarFixe(50, 50));
-        server.getPoiList().addPOI(new RadarMobile(100, 100));
-        server.getPoiList().addPOI(new Travaux(2.709975, 48.836659));
+        server.getPoiList().addPOI(new FixedSpeedCam(50, 50));
+        server.getPoiList().addPOI(new MobileSpeedCam(100, 100));
+        server.getPoiList().addPOI(new RoadWorks(2.709975, 48.836659));
 
         // Launching the server GUI.
         ServerJFrame frame = new ServerJFrame(server, clientCommandLogger, server.getPoiList());
