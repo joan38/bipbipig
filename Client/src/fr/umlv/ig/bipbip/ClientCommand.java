@@ -16,6 +16,7 @@
  */
 package fr.umlv.ig.bipbip;
 
+import fr.umlv.ig.bipbip.poi.POIType;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
@@ -27,15 +28,15 @@ import java.util.Date;
  */
 public class ClientCommand {
 
-    public static void submit(SocketChannel sc, EventType event, double x, double y, Date date) throws IOException {
-        NetUtil.writeLine(sc, "SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtil.getDateformat().format(date));
+    public static void submit(SocketChannel sc, POIType event, double x, double y, Date date) throws IOException {
+        NetUtils.writeLine(sc, "SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
     }
 
-    public static void notSeen(SocketChannel sc, EventType event, double x, double y, Date date) throws IOException {
-        NetUtil.writeLine(sc, "NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtil.getDateformat().format(date));
+    public static void notSeen(SocketChannel sc, POIType event, double x, double y, Date date) throws IOException {
+        NetUtils.writeLine(sc, "NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
     }
 
     public static void getInfo(SocketChannel sc, double x, double y) throws IOException {
-        NetUtil.writeLine(sc, "GET_INFO " + x + " " + y);
+        NetUtils.writeLine(sc, "GET_INFO " + x + " " + y);
     }
 }
