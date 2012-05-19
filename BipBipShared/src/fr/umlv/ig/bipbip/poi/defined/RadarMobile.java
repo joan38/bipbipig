@@ -28,10 +28,10 @@ import java.util.Date;
 public class RadarMobile extends SimplePOI {
 
     public RadarMobile(double positionX, double positionY) {
-        super(positionX, positionY, POIType.RADAR_MOBILE);
+        super(positionX, positionY, POIType.MOBILE_SPEED_CAM);
     }
 
     public RadarMobile(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.RADAR_MOBILE, date);
+        super(positionX, positionY, POIType.MOBILE_SPEED_CAM, date);
     }
 }

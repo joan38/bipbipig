@@ -28,11 +28,11 @@ import java.util.Date;
  */
 public enum POIType {
 
-    RADAR_FIXE("radar_fixe.png"),
-    RADAR_MOBILE("radar_mobile.png"),
+    FIXED_SPEED_CAM("fixed_speed_cam.png"),
+    MOBILE_SPEED_CAM("mobile_speed_cam.png"),
     ACCIDENT("accident.png"),
-    TRAVAUX("travaux.png"),
-    DIVERS("divers.png");
+    ROADWORKS("roadworks.png"),
+    MISCELLANEOUS("miscellaneous.png");
     private final String imageName;
 
     /**
@@ -58,13 +58,13 @@ public enum POIType {
         switch (this) {
             case ACCIDENT:
                 return new Accident(positionX, positionY, date);
-            case DIVERS:
+            case MISCELLANEOUS:
                 return new Divers(positionX, positionY, date);
-            case RADAR_FIXE:
+            case FIXED_SPEED_CAM:
                 return new RadarFixe(positionX, positionY, date);
-            case RADAR_MOBILE:
+            case MOBILE_SPEED_CAM:
                 return new RadarMobile(positionX, positionY, date);
-            case TRAVAUX:
+            case ROADWORKS:
                 return new Travaux(positionX, positionY, date);
             default:
                 throw new UnsupportedOperationException("Unknown Event Type.");

@@ -28,10 +28,10 @@ import java.util.Date;
 public class Divers extends SimplePOI {
 
     public Divers(double positionX, double positionY) {
-        super(positionX, positionY, POIType.DIVERS);
+        super(positionX, positionY, POIType.MISCELLANEOUS);
     }
 
     public Divers(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.DIVERS, date);
+        super(positionX, positionY, POIType.MISCELLANEOUS, date);
     }
 }

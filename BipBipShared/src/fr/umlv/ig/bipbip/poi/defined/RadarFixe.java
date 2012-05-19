@@ -28,10 +28,10 @@ import java.util.Date;
 public class RadarFixe extends SimplePOI {
 
     public RadarFixe(double positionX, double positionY) {
-        super(positionX, positionY, POIType.RADAR_FIXE);
+        super(positionX, positionY, POIType.FIXED_SPEED_CAM);
     }
 
     public RadarFixe(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.RADAR_FIXE, date);
+        super(positionX, positionY, POIType.FIXED_SPEED_CAM, date);
     }
 }
