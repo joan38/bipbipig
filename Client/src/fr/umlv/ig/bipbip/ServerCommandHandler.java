@@ -16,11 +16,8 @@
  */
 package fr.umlv.ig.bipbip;
 
-import fr.umlv.ig.bipbip.Event;
-import fr.umlv.ig.bipbip.EventType;
-import fr.umlv.ig.bipbip.NetUtil;
 import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.SimplePOI;
+import fr.umlv.ig.bipbip.poi.POIType;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -86,11 +83,11 @@ public enum ServerCommandHandler {
         public POI handle(SocketChannel sc, Scanner scanner) throws IOException {
             if (!scanner.hasNext()) throw new IOException("Invalid command");
             
-            EventType event;
+            POIType event;
             double x,y;
             
             try {
-                event=EventType.valueOf(scanner.next());
+                event=POIType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }

@@ -20,11 +20,10 @@ import fr.umlv.ig.bipbip.poi.MapPOIModel;
 import fr.umlv.ig.bipbip.poi.POI;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
@@ -34,10 +33,12 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class MapPOIModelUpdater implements Runnable {
 
+    private final Object waiter = new Object();
     private final MapPOIModel model;
     private final InetSocketAddress server;
     private final long updateInterval;
     private final JMapViewer mapViewer;
+    private SocketChannel channel;
 
     /**
      *
@@ -54,14 +55,25 @@ public class MapPOIModelUpdater implements Runnable {
         this.mapViewer = mapViewer;
     }
 
+    public void update() throws IOException {
+        if (channel == null) {
+            throw new IOException("The updater has not been connected to the server");
+        }
+        if (!channel.isConnected()) {
+            throw new ClosedChannelException();
+        }
+        
+        synchronized (waiter) {
+            waiter.notify();
+        }
+    }
+
     @Override
     public void run() {
-        SocketChannel channel = null;
-
         try {
             channel = SocketChannel.open();
             channel.connect(server);
-            Scanner scanner = new Scanner(channel, NetUtil.getCharset().name());
+            Scanner scanner = new Scanner(channel, NetUtils.getCharset().name());
 
             while (!Thread.interrupted()) {
                 Coordinate coordinate = mapViewer.getPosition();
@@ -84,7 +96,9 @@ public class MapPOIModelUpdater implements Runnable {
                 }
 
                 try {
-                    Thread.sleep(updateInterval);
+                    synchronized (waiter) {
+                        waiter.wait(updateInterval);
+                    }
                 } catch (InterruptedException e) {
                     break;
                 }
