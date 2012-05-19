@@ -153,6 +153,11 @@ public class BipbipServer {
      * @param args Unused.
      */
     public static void main(String[] args) throws IOException {
+        if (args.length < 1) {
+            System.err.println("Please give the listening port in arguments: <port>");
+            return;
+        }
+        
         try {
             // Set System L&F
             UIManager.setLookAndFeel(
@@ -181,7 +186,7 @@ public class BipbipServer {
          * doubles and dates
          */
         Locale.setDefault(Locale.US);
-        BipbipServer server = new BipbipServer(6996);
+        BipbipServer server = new BipbipServer(Integer.parseInt(args[0]));
         server.serve();
         
         // Some dummy points.
