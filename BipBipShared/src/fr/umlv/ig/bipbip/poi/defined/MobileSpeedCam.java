@@ -21,17 +21,17 @@ import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.util.Date;
 
 /**
- * Represent a radar fixe.
+ * Represent a radar mobile.
  * 
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class RadarFixe extends SimplePOI {
+public class MobileSpeedCam extends SimplePOI {
 
-    public RadarFixe(double positionX, double positionY) {
-        super(positionX, positionY, POIType.FIXED_SPEED_CAM);
+    public MobileSpeedCam(double positionX, double positionY) {
+        super(positionX, positionY, POIType.MOBILE_SPEED_CAM);
     }
 
-    public RadarFixe(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.FIXED_SPEED_CAM, date);
+    public MobileSpeedCam(double positionX, double positionY, Date date) {
+        super(positionX, positionY, POIType.MOBILE_SPEED_CAM, date);
     }
 }

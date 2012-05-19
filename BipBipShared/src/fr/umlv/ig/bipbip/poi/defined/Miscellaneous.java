@@ -21,17 +21,17 @@ import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.util.Date;
 
 /**
- * Represent a travaux.
- *
+ * Represent all unknown POI.
+ * 
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class Travaux extends SimplePOI {
+public class Miscellaneous extends SimplePOI {
 
-    public Travaux(double positionX, double positionY) {
-        super(positionX, positionY, POIType.ROADWORKS);
+    public Miscellaneous(double positionX, double positionY) {
+        super(positionX, positionY, POIType.MISCELLANEOUS);
     }
 
-    public Travaux(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.ROADWORKS, date);
+    public Miscellaneous(double positionX, double positionY, Date date) {
+        super(positionX, positionY, POIType.MISCELLANEOUS, date);
     }
 }

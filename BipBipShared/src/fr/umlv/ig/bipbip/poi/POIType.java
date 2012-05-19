@@ -28,18 +28,20 @@ import java.util.Date;
  */
 public enum POIType {
 
-    FIXED_SPEED_CAM("fixed_speed_cam.png"),
-    MOBILE_SPEED_CAM("mobile_speed_cam.png"),
-    ACCIDENT("accident.png"),
-    ROADWORKS("roadworks.png"),
-    MISCELLANEOUS("miscellaneous.png");
+    FIXED_SPEED_CAM("Fixed speed cam", "fixed_speed_cam.png"),
+    MOBILE_SPEED_CAM("Mobile", "mobile_speed_cam.png"),
+    ACCIDENT("Accident", "accident.png"),
+    ROADWORKS("Roadworks", "roadworks.png"),
+    MISCELLANEOUS("Miscellaneous", "miscellaneous.png");
+    private final String title;
     private final String imageName;
 
     /**
      * Creates an event.
      */
-    private POIType(String imagePath) {
-        this.imageName = imagePath;
+    private POIType(String title, String imageName) {
+        this.title = title;
+        this.imageName = imageName;
     }
 
     /**
@@ -59,15 +61,20 @@ public enum POIType {
             case ACCIDENT:
                 return new Accident(positionX, positionY, date);
             case MISCELLANEOUS:
-                return new Divers(positionX, positionY, date);
+                return new Miscellaneous(positionX, positionY, date);
             case FIXED_SPEED_CAM:
-                return new RadarFixe(positionX, positionY, date);
+                return new FixedSpeedCam(positionX, positionY, date);
             case MOBILE_SPEED_CAM:
-                return new RadarMobile(positionX, positionY, date);
+                return new MobileSpeedCam(positionX, positionY, date);
             case ROADWORKS:
-                return new Travaux(positionX, positionY, date);
+                return new RoadWorks(positionX, positionY, date);
             default:
                 throw new UnsupportedOperationException("Unknown Event Type.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return title;
     }
 }
