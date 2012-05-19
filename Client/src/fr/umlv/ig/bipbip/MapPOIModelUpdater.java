@@ -33,11 +33,11 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class MapPOIModelUpdater implements Runnable {
 
-    private final Object waiter = new Object();
     private final MapPOIModel model;
     private final InetSocketAddress server;
     private final long updateInterval;
     private final JMapViewer mapViewer;
+    private final boolean keepAlive;
     private SocketChannel channel;
 
     /**
@@ -47,73 +47,65 @@ public class MapPOIModelUpdater implements Runnable {
      * @param mapViewer
      * @param server
      * @param updateInterval in millisec
+     * @param keepAlive
      */
-    public MapPOIModelUpdater(MapPOIModel model, JMapViewer mapViewer, InetSocketAddress server, long updateInterval) {
+    public MapPOIModelUpdater(MapPOIModel model, JMapViewer mapViewer, InetSocketAddress server, long updateInterval, boolean keepAlive) {
         this.model = model;
         this.server = server;
         this.updateInterval = updateInterval;
         this.mapViewer = mapViewer;
+        this.keepAlive = keepAlive;
     }
 
     public void update() throws IOException {
-        if (channel == null) {
-            throw new IOException("The updater has not been connected to the server");
-        }
-        if (!channel.isConnected()) {
-            throw new ClosedChannelException();
-        }
-        
-        synchronized (waiter) {
-            waiter.notify();
-        }
-    }
-
-    @Override
-    public void run() {
         try {
-            channel = SocketChannel.open();
-            channel.connect(server);
+            if (channel == null || !channel.isConnected()) {
+                channel = SocketChannel.open();
+                channel.connect(server);
+            }
+
             Scanner scanner = new Scanner(channel, NetUtils.getCharset().name());
 
-            while (!Thread.interrupted()) {
-                Coordinate coordinate = mapViewer.getPosition();
-                ClientCommand.getInfo(channel, coordinate.getLon(), coordinate.getLat());
+            Coordinate coordinate = mapViewer.getPosition();
+            ClientCommand.getInfo(channel, coordinate.getLon(), coordinate.getLat());
 
-                if (!scanner.hasNext() || !scanner.next().equals(ServerCommandHandler.INFOS.name())) {
-                    throw new IOException("Server did not respond to the GET_INFO query");
-                }
-                ArrayList<POI> POIs = model.getAllPOI();
-                ArrayList<POI> newPOIs = (ArrayList<POI>) ServerCommandHandler.INFOS.handle(channel, scanner);
-                for (POI poi : newPOIs) {
-                    if (!POIs.contains(poi)) {
-                        model.addPOI(poi);
-                    }
-                }
-                for (POI poi : POIs) {
-                    if (!newPOIs.contains(poi)) {
-                        model.removePOI(poi);
-                    }
-                }
-
-                try {
-                    synchronized (waiter) {
-                        waiter.wait(updateInterval);
-                    }
-                } catch (InterruptedException e) {
-                    break;
+            if (!scanner.hasNext() || !scanner.next().equals(ServerCommandHandler.INFOS.name())) {
+                throw new IOException("Server did not respond to the GET_INFO query");
+            }
+            ArrayList<POI> POIs = model.getAllPOI();
+            ArrayList<POI> newPOIs = (ArrayList<POI>) ServerCommandHandler.INFOS.handle(channel, scanner);
+            for (POI poi : newPOIs) {
+                if (!POIs.contains(poi)) {
+                    model.addPOI(poi);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
+            for (POI poi : POIs) {
+                if (!newPOIs.contains(poi)) {
+                    model.removePOI(poi);
+                }
+            }
         } finally {
-            if (channel != null) {
+            if (!keepAlive) {
                 try {
                     channel.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (!Thread.interrupted()) {
+                update();
+                Thread.sleep(updateInterval);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (InterruptedException e) {
         }
     }
 }

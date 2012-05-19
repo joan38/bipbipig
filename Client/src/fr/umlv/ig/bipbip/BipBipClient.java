@@ -42,10 +42,16 @@ public class BipBipClient extends JFrame {
 
     private static final String TITLE = "BipBip Client";
     private static final long POI_UPDATE_INTERVAL = 60000;
+    private static final boolean KEEP_ALIVE_CONNECTION = true;
     private static final int width = 550;
     private static final int height = 450;
 
     public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println("Please give the server's host and port in arguments: <host> <port>");
+            return;
+        }
+        
         JFrame frame = new JFrame(TITLE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setBounds((screenSize.width - width) / 2, (screenSize.height - height) / 2, width, height);
@@ -80,7 +86,8 @@ public class BipBipClient extends JFrame {
         final MapPOIModelUpdater mapPOIModelUpdater = new MapPOIModelUpdater(mapPOIModel,
                 map,
                 new InetSocketAddress(args[0], Integer.parseInt(args[1])),
-                POI_UPDATE_INTERVAL);
+                POI_UPDATE_INTERVAL,
+                KEEP_ALIVE_CONNECTION);
         new Thread(mapPOIModelUpdater).start();
         layeredPane.add(map);
 

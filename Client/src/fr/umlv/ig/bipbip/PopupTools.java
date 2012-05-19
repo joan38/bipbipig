@@ -46,11 +46,12 @@ public final class PopupTools {
         }
         
         JPopupMenu popupMenu = new JPopupMenu();
-        JLabel signaler = new JLabel(type.name());
+        String typeName = type.name();
+        JLabel signaler = new JLabel(typeName.substring(0, 1).toUpperCase() + typeName.substring(1).toLowerCase());
         signaler.setBorder(new EmptyBorder(1, 10, 5, 0));
         signaler.setForeground(Color.GRAY);
         popupMenu.add(signaler);
-        popupMenu.add(new JMenuItem("Déclarer inexistant", ImageFactory.getImage("supprimer.png")));
+        popupMenu.add(new JMenuItem("Declare as missing", ImageFactory.getImage("delete.png")));
         poiPopupMenu.put(type, popupMenu);
         
         return popupMenu;
@@ -66,11 +67,11 @@ public final class PopupTools {
         signaler.setBorder(new EmptyBorder(1, 10, 5, 0));
         signaler.setForeground(Color.GRAY);
         mapPopupMenu.add(signaler);
-        mapPopupMenu.add(new JMenuItem("Radar fixe", POIImageFactory.getImage(POIType.RADAR_FIXE)));
-        mapPopupMenu.add(new JMenuItem("Radar mobile", POIImageFactory.getImage(POIType.RADAR_MOBILE)));
+        mapPopupMenu.add(new JMenuItem("Fixed speed cam", POIImageFactory.getImage(POIType.FIXED_SPEED_CAM)));
+        mapPopupMenu.add(new JMenuItem("Mobile speed cam", POIImageFactory.getImage(POIType.MOBILE_SPEED_CAM)));
         mapPopupMenu.add(new JMenuItem("Accident", POIImageFactory.getImage(POIType.ACCIDENT)));
-        mapPopupMenu.add(new JMenuItem("Travaux", POIImageFactory.getImage(POIType.TRAVAUX)));
-        mapPopupMenu.add(new JMenuItem("Divers", POIImageFactory.getImage(POIType.DIVERS)));
+        mapPopupMenu.add(new JMenuItem("Roadworks", POIImageFactory.getImage(POIType.ROADWORKS)));
+        mapPopupMenu.add(new JMenuItem("Miscellaneous", POIImageFactory.getImage(POIType.MISCELLANEOUS)));
         
         return mapPopupMenu;
     }
