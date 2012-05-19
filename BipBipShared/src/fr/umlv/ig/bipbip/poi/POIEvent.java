@@ -16,9 +16,6 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POI;
-
 /**
  * Point of Interest event.
  *

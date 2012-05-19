@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi.defined;
 
-import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.POIType;
 import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.util.Date;
 
@@ -28,10 +28,10 @@ import java.util.Date;
 public class RadarFixe extends SimplePOI {
 
     public RadarFixe(double positionX, double positionY) {
-        super(positionX, positionY, EventType.RADAR_FIXE);
+        super(positionX, positionY, POIType.RADAR_FIXE);
     }
 
     public RadarFixe(double positionX, double positionY, Date date) {
-        super(positionX, positionY, EventType.RADAR_FIXE, date);
+        super(positionX, positionY, POIType.RADAR_FIXE, date);
     }
 }

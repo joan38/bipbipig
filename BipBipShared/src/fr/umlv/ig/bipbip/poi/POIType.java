@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip;
+package fr.umlv.ig.bipbip.poi;
 
-import fr.umlv.ig.bipbip.poi.POI;
 import fr.umlv.ig.bipbip.poi.defined.*;
 import java.util.Date;
 
@@ -27,7 +26,7 @@ import java.util.Date;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public enum EventType {
+public enum POIType {
 
     RADAR_FIXE("radar_fixe.png"),
     RADAR_MOBILE("radar_mobile.png"),
@@ -39,7 +38,7 @@ public enum EventType {
     /**
      * Creates an event.
      */
-    private EventType(String imagePath) {
+    private POIType(String imagePath) {
         this.imageName = imagePath;
     }
 

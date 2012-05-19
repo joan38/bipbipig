@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi.defined;
 
-import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.POIType;
 import fr.umlv.ig.bipbip.poi.SimplePOI;
 import java.util.Date;
 
@@ -28,10 +28,10 @@ import java.util.Date;
 public class Travaux extends SimplePOI {
 
     public Travaux(double positionX, double positionY) {
-        super(positionX, positionY, EventType.TRAVAUX);
+        super(positionX, positionY, POIType.TRAVAUX);
     }
 
     public Travaux(double positionX, double positionY, Date date) {
-        super(positionX, positionY, EventType.TRAVAUX, date);
+        super(positionX, positionY, POIType.TRAVAUX, date);
     }
 }

@@ -16,8 +16,6 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
-import fr.umlv.ig.bipbip.Event;
-import fr.umlv.ig.bipbip.EventType;
 import java.util.Date;
 
 /**
@@ -27,7 +25,7 @@ public abstract class SimplePOI implements POI {
 
     private final double positionX;
     private final double positionY;
-    private final EventType type;
+    private final POIType type;
     private final Date date;
     private int confirmations;
     private int refusals;
@@ -40,12 +38,11 @@ public abstract class SimplePOI implements POI {
      * @param type Type of the POI.
      * @param date Date of the POI.
      */
-    public SimplePOI(double positionX, double positionY, EventType type, Date date) {
+    public SimplePOI(double positionX, double positionY, POIType type, Date date) {
         this.positionX = positionX;
         this.positionY = positionY;
         this.type = type;
         this.date = date;
-
         this.confirmations = 0;
         this.refusals = 0;
     }
@@ -59,7 +56,7 @@ public abstract class SimplePOI implements POI {
      *
      * The date of the POI is set to the current time.
      */
-    public SimplePOI(double positionX, double positionY, EventType type) {
+    public SimplePOI(double positionX, double positionY, POIType type) {
         this(positionX, positionY, type, new Date());
     }
 
@@ -69,7 +66,7 @@ public abstract class SimplePOI implements POI {
      * @return The type of the POI.
      */
     @Override
-    public EventType getType() {
+    public POIType getType() {
         return type;
     }
 
@@ -141,16 +138,6 @@ public abstract class SimplePOI implements POI {
     @Override
     public void setRefusals(int refusals) {
         this.refusals = refusals;
-    }
-
-    /**
-     * Returns a new event from this POI.
-     *
-     * @return An event.
-     */
-    @Override
-    public Event toEvent() {
-        return new Event(type, positionX, positionY);
     }
 
     @Override
