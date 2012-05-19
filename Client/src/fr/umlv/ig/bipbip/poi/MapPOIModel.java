@@ -16,17 +16,8 @@
  */
 package fr.umlv.ig.bipbip.poi;
 
-import fr.umlv.ig.bipbip.ClientCommand;
-import fr.umlv.ig.bipbip.Event;
-import fr.umlv.ig.bipbip.NetUtil;
-import fr.umlv.ig.bipbip.ServerCommandHandler;
-import fr.umlv.ig.bipbip.poi.POI;
-import java.io.IOException;
-import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
