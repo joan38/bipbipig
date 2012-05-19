@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.POIType;
 import fr.umlv.ig.bipbip.poi.POI;
 import fr.umlv.ig.bipbip.poi.POIEvent;
 import fr.umlv.ig.bipbip.poi.POIListener;
@@ -140,8 +140,8 @@ public class POIList {
      * @return A list of all POI contained between those two points.
      */
     public SortedSet<POI> getPointsBetween(Double x1, Double y1, Double x2, Double y2) {
-        POI p1 = new DummyPOI(x1, y1, EventType.DIVERS);
-        POI p2 = new DummyPOI(x2, y2, EventType.DIVERS);
+        POI p1 = new DummyPOI(x1, y1, POIType.DIVERS);
+        POI p2 = new DummyPOI(x2, y2, POIType.DIVERS);
 
         return points.subSet(p1, p2);
     }
@@ -158,7 +158,7 @@ public class POIList {
      *
      * @return A list of POI found at this position.
      */
-    public ArrayList<POI> getPOIAt(Double x, Double y, EventType type) {
+    public ArrayList<POI> getPOIAt(Double x, Double y, POIType type) {
         POI p1 = new DummyPOI(x - precision, y - precision, type);
         POI p2 = new DummyPOI(x + precision, y + precision, type);
 
@@ -197,7 +197,7 @@ public class POIList {
      */
     private static class DummyPOI extends SimplePOI {
 
-        public DummyPOI(double positionX, double positionY, EventType type) {
+        public DummyPOI(double positionX, double positionY, POIType type) {
             super(positionX, positionY, type);
         }
     }

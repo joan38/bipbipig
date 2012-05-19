@@ -17,7 +17,7 @@
 package fr.umlv.ig.bipbip.server.gui;
 
 import fr.umlv.ig.bipbip.BipbipServer;
-import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.POIType;
 import fr.umlv.ig.bipbip.poi.POI;
 import fr.umlv.ig.bipbip.poi.POIEvent;
 import fr.umlv.ig.bipbip.poi.POIListener;
@@ -275,7 +275,7 @@ public class ServerJFrame extends JFrame {
     private class POITableModel extends AbstractTableModel {
 
         private final String[] columnNames = {"Date", "Type", "+", "-", "X", "Y"};
-        private final Class[] columnClass = {Date.class, EventType.class, int.class, int.class, double.class, double.class};
+        private final Class[] columnClass = {Date.class, POIType.class, int.class, int.class, double.class, double.class};
 
         @Override
         public Class getColumnClass(int column) {

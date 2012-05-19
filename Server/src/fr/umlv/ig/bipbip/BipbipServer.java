@@ -108,7 +108,7 @@ public class BipbipServer {
      */
     private void serveClient(final SocketChannel sc) {
         System.out.println("Dealing with client...");
-        Scanner scanner = new Scanner(sc, NetUtil.getCharset().name());
+        Scanner scanner = new Scanner(sc, NetUtils.getCharset().name());
         try {
             while (scanner.hasNextLine()) {
                 System.out.println("lecture depuis le réseau");

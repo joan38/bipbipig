@@ -16,10 +16,9 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.Event;
-import fr.umlv.ig.bipbip.EventType;
-import fr.umlv.ig.bipbip.NetUtil;
+import fr.umlv.ig.bipbip.NetUtils;
 import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.POIType;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -53,11 +52,11 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            EventType event;
+            POIType event;
             double x, y;
             Date date;
             try {
-                event = EventType.valueOf(scanner.next());
+                event = POIType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
@@ -81,7 +80,7 @@ public enum ClientCommandHandler {
                 while (d.startsWith(" ")) {
                     d = d.substring(1);
                 }
-                date = NetUtil.getDateformat().parse(d);
+                date = NetUtils.getDateformat().parse(d);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IOException("Invalid date: " + d);
@@ -95,7 +94,7 @@ public enum ClientCommandHandler {
             // Adding the POI to the collection.
             poiList.addPOI(poi);
 
-            logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtil.getDateformat().format(date));
+            logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
         }
     },
     NOT_SEEN {
@@ -115,11 +114,11 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            EventType event;
+            POIType event;
             double x, y;
             Date date;
             try {
-                event = EventType.valueOf(scanner.next());
+                event = POIType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
@@ -143,7 +142,7 @@ public enum ClientCommandHandler {
                 while (d.startsWith(" ")) {
                     d = d.substring(1);
                 }
-                date = NetUtil.getDateformat().parse(d);
+                date = NetUtils.getDateformat().parse(d);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IOException("Invalid date: " + d);
@@ -165,7 +164,7 @@ public enum ClientCommandHandler {
                 poiList.notSeen(poi);
             }
 
-            logger.log((poi == null) ? Level.WARNING : Level.INFO, "CLIENT: NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtil.getDateformat().format(date));
+            logger.log((poi == null) ? Level.WARNING : Level.INFO, "CLIENT: NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
         }
     },
     GET_INFO {
@@ -197,9 +196,9 @@ public enum ClientCommandHandler {
             SortedSet<POI> points = poiList.getPointsBetween(x - squareArea, y - squareArea, x + squareArea, y + squareArea);
 
             // Creation of the arraylist.
-            ArrayList<Event> list = new ArrayList<Event>(points.size());
+            ArrayList<POI> list = new ArrayList<POI>(points.size());
             for (POI p : points) {
-                list.add(p.toEvent());
+                list.add(p);
             }
 
             // Sending the answer.
