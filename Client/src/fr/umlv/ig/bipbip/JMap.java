@@ -21,13 +21,10 @@ import fr.umlv.ig.bipbip.poi.POIEvent;
 import fr.umlv.ig.bipbip.poi.POIListener;
 import fr.umlv.ig.bipbip.poi.POIModel;
 import fr.umlv.ig.bipbip.poi.swing.JPOI;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Objects;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
 /**
  *
@@ -36,23 +33,12 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 public final class JMap extends JMapViewer implements POIListener {
 
     POIModel model;
-    HashMap<POI, JPOI> POItoJPOI = new HashMap<POI, JPOI>();
-    
-    public JMap(POIModel model) {
-        addMouseListener(new MouseAdapter() {
+    HashMap<POI, JPOI> poiToJPOI = new HashMap<POI, JPOI>();
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                List<MapMarker> mapMarkers = getMapMarkerList();
-                for (MapMarker mapMarker : mapMarkers) {
-                    JPOI jpoi = (JPOI) mapMarker;
-                    if (jpoi.getIconArea().contains(getMousePosition())) {
-                        System.out.println("Ahah");
-                    }
-                }
-            }
-        });
-        
+    public JMap(POIModel model) {
+        super();
+        Objects.requireNonNull(model);
+
         this.model = model;
         ArrayList<POI> pois = model.getAllPOI();
         for (POI poi : pois) {
@@ -63,15 +49,21 @@ public final class JMap extends JMapViewer implements POIListener {
 
     @Override
     public void poiAdded(POIEvent e) {
+        Objects.requireNonNull(e);
+
         POI poi = e.getPoi();
         JPOI jpoi = new JPOI(poi);
-        POItoJPOI.put(poi, jpoi);
+        poiToJPOI.put(poi, jpoi);
         addMapMarker(jpoi);
     }
 
     @Override
     public void poiRemoved(POIEvent e) {
-        removeMapMarker(POItoJPOI.get(e.getPoi()));
+        Objects.requireNonNull(e);
+        
+        POI poi = e.getPoi();
+        removeMapMarker(poiToJPOI.get(poi));
+        poiToJPOI.remove(poi);
     }
 
     @Override
