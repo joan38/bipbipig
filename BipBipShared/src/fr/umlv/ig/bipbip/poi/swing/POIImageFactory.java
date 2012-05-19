@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi.swing;
 
-import fr.umlv.ig.bipbip.EventType;
+import fr.umlv.ig.bipbip.poi.POIType;
 import java.util.EnumMap;
 import javax.swing.ImageIcon;
 
@@ -27,7 +27,7 @@ import javax.swing.ImageIcon;
  */
 public class POIImageFactory {
 
-    private static EnumMap<EventType, ImageIcon> images = new EnumMap<EventType, ImageIcon>(EventType.class);
+    private static EnumMap<POIType, ImageIcon> images = new EnumMap<POIType, ImageIcon>(POIType.class);
 
     /**
      * Gets an image of a POI.
@@ -37,7 +37,7 @@ public class POIImageFactory {
      * @param type Type of the POI.
      * @return The image.
      */
-    public static ImageIcon getImage(EventType type) {
+    public static ImageIcon getImage(POIType type) {
         if (images.containsKey(type)) {
             return images.get(type);
         }
