@@ -16,8 +16,8 @@
  */
 package fr.umlv.ig.bipbip.poi.defined;
 
-import fr.umlv.ig.bipbip.poi.POIType;
-import fr.umlv.ig.bipbip.poi.SimplePOI;
+import fr.umlv.ig.bipbip.poi.PoiType;
+import fr.umlv.ig.bipbip.poi.ReportingPoi;
 import java.util.Date;
 
 /**
@@ -25,13 +25,9 @@ import java.util.Date;
  * 
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class MobileSpeedCam extends SimplePOI {
-
-    public MobileSpeedCam(double positionX, double positionY) {
-        super(positionX, positionY, POIType.MOBILE_SPEED_CAM);
-    }
+public class MobileSpeedCam extends ReportingPoi {
 
     public MobileSpeedCam(double positionX, double positionY, Date date) {
-        super(positionX, positionY, POIType.MOBILE_SPEED_CAM, date);
+        super(positionX, positionY, PoiType.MOBILE_SPEED_CAM, date);
     }
 }

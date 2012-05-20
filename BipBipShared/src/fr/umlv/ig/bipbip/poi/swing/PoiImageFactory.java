@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.poi.swing;
 
-import fr.umlv.ig.bipbip.poi.POIType;
+import fr.umlv.ig.bipbip.poi.PoiType;
 import java.util.EnumMap;
 import javax.swing.ImageIcon;
 
@@ -25,9 +25,9 @@ import javax.swing.ImageIcon;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class POIImageFactory {
+public class PoiImageFactory {
 
-    private static EnumMap<POIType, ImageIcon> images = new EnumMap<POIType, ImageIcon>(POIType.class);
+    private static EnumMap<PoiType, ImageIcon> images = new EnumMap<PoiType, ImageIcon>(PoiType.class);
 
     /**
      * Gets an image of a POI.
@@ -37,12 +37,12 @@ public class POIImageFactory {
      * @param type Type of the POI.
      * @return The image.
      */
-    public static ImageIcon getImage(POIType type) {
+    public static ImageIcon getImage(PoiType type) {
         if (images.containsKey(type)) {
             return images.get(type);
         }
         // Loading the image.
-        ImageIcon imageIcon = new ImageIcon(POIImageFactory.class.getResource(type.getImageName()));
+        ImageIcon imageIcon = new ImageIcon(PoiImageFactory.class.getResource(type.getImageName()));
         
         images.put(type, imageIcon);
         

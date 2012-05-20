@@ -26,20 +26,50 @@ import java.util.Date;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public enum POIType {
+public enum PoiType {
 
-    FIXED_SPEED_CAM("Fixed speed cam", "fixed_speed_cam.png"),
-    MOBILE_SPEED_CAM("Mobile", "mobile_speed_cam.png"),
-    ACCIDENT("Accident", "accident.png"),
-    ROADWORKS("Roadworks", "roadworks.png"),
-    MISCELLANEOUS("Miscellaneous", "miscellaneous.png");
+    FIXED_SPEED_CAM("Fixed speed cam", "fixed_speed_cam.png") {
+
+        @Override
+        public Poi constructPOI(double latitude, double longitude, Date date) {
+            return new FixedSpeedCam(latitude, longitude, date);
+        }
+    },
+    MOBILE_SPEED_CAM("Mobile", "mobile_speed_cam.png") {
+
+        @Override
+        public Poi constructPOI(double latitude, double longitude, Date date) {
+            return new MobileSpeedCam(latitude, longitude, date);
+        }
+    },
+    ACCIDENT("Accident", "accident.png") {
+
+        @Override
+        public Poi constructPOI(double latitude, double longitude, Date date) {
+            return new Accident(latitude, longitude, date);
+        }
+    },
+    ROADWORKS("Roadworks", "roadworks.png") {
+
+        @Override
+        public Poi constructPOI(double latitude, double longitude, Date date) {
+            return new RoadWorks(latitude, longitude, date);
+        }
+    },
+    MISCELLANEOUS("Miscellaneous", "miscellaneous.png") {
+
+        @Override
+        public Poi constructPOI(double latitude, double longitude, Date date) {
+            return new Miscellaneous(latitude, longitude, date);
+        }
+    };
     private final String title;
     private final String imageName;
 
     /**
      * Creates an event.
      */
-    private POIType(String title, String imageName) {
+    private PoiType(String title, String imageName) {
         this.title = title;
         this.imageName = imageName;
     }
@@ -54,24 +84,12 @@ public enum POIType {
     /**
      * Returns a new POI of the type EventType.
      *
+     * @param latitude
+     * @param longitude
+     * @param date
      * @return A POI of the type EventType.
      */
-    public POI constructPOI(double positionX, double positionY, Date date) {
-        switch (this) {
-            case ACCIDENT:
-                return new Accident(positionX, positionY, date);
-            case MISCELLANEOUS:
-                return new Miscellaneous(positionX, positionY, date);
-            case FIXED_SPEED_CAM:
-                return new FixedSpeedCam(positionX, positionY, date);
-            case MOBILE_SPEED_CAM:
-                return new MobileSpeedCam(positionX, positionY, date);
-            case ROADWORKS:
-                return new RoadWorks(positionX, positionY, date);
-            default:
-                throw new UnsupportedOperationException("Unknown Event Type.");
-        }
-    }
+    public abstract Poi constructPOI(double latitude, double longitude, Date date);
 
     @Override
     public String toString() {

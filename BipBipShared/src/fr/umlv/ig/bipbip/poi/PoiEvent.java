@@ -14,33 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.images;
-
-import java.util.HashMap;
-import java.util.Objects;
-import javax.swing.ImageIcon;
+package fr.umlv.ig.bipbip.poi;
 
 /**
- * Flyweight class used for image loading.
+ * Point of Interest event.
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public final class ImageFactory {
+public class PoiEvent {
 
-    private static HashMap<String, ImageIcon> images = new HashMap<String, ImageIcon>();
+    private final Object source;
+    private final Poi poi;
 
-    private ImageFactory() {}
-    
-    public static ImageIcon getImage(String imageName) {
-        Objects.requireNonNull(imageName);
-        
-        if (images.containsKey(imageName)) {
-            return images.get(imageName);
-        }
-        
-        ImageIcon imageIcon = new ImageIcon(ImageFactory.class.getResource(imageName));
-        images.put(imageName, imageIcon);
-        
-        return imageIcon;
+    /**
+     * Creates a new point of interest event.
+     *
+     * @param source Object that emit the event.
+     * @param poi Object emitting the event.
+     */
+    public PoiEvent(Object source, Poi poi) {
+        this.poi = poi;
+        this.source = source;
+    }
+
+    /**
+     * Gets the point of interest of the event.
+     *
+     * @return The POI.
+     */
+    public Poi getPoi() {
+        return poi;
+    }
+
+    /**
+     * Gets the emitter of the event.
+     *
+     * @return The object that emitted the event.
+     */
+    public Object getSource() {
+        return source;
     }
 }
