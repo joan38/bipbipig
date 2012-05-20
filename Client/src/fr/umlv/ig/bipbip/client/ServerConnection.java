@@ -130,8 +130,8 @@ public class ServerConnection {
      *
      * where N is the number of lines of information. Each line is of the form:
      *
-     * <line_N> = INFO <POI type> <latitude> <longitude> <date> <date> =
-     * yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * <line_N> = INFO <POI type> <latitude> <longitude> <date>
+     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param coordinate
      * @return
