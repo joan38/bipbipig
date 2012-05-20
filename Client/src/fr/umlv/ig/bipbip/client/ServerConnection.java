@@ -19,7 +19,6 @@ package fr.umlv.ig.bipbip.client;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -60,15 +59,18 @@ public class ServerConnection {
         }
     }
 
-    public ServerConnection(InetSocketAddress address) {
+    public ServerConnection(SocketAddress address) {
+        Objects.requireNonNull(address);
+        
         this.address = address;
     }
 
     /**
      * Sumit a new POI to the server
      *
-     * A SUBMIT command is supposed to have the following form: SUBMIT <POI
-     * type> <latitude> <longitude> <date> <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * A SUBMIT command is supposed to have the following form:
+     * SUBMIT <POI type> <latitude> <longitude> <date>
+     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param poi
      * @throws IOException

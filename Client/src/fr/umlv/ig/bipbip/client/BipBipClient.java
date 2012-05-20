@@ -19,6 +19,7 @@ package fr.umlv.ig.bipbip.client;
 import fr.umlv.ig.bipbip.client.gui.JMap;
 import fr.umlv.ig.bipbip.client.gui.LayeredLayoutManager;
 import fr.umlv.ig.bipbip.client.gui.ListenerFactory;
+import fr.umlv.ig.bipbip.client.gui.PopupFactory;
 import fr.umlv.ig.bipbip.client.model.ServerPoiModel;
 import fr.umlv.ig.bipbip.images.ImageFactory;
 import java.awt.Color;
@@ -27,6 +28,7 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JFrame;
@@ -42,19 +44,15 @@ public class BipBipClient {
 
     private static final String TITLE = "BipBip Client";
     private static final long POI_UPDATE_INTERVAL = 40000;
-    private static final int width = 550;
-    private static final int height = 450;
+    private static final int WIDTH = 550;
+    private static final int HEIGHT = 450;
+    private static final int DEFAULT_PORT = 6996;
 
     public static void main(String[] args) throws InterruptedException {
-        if (args.length < 2) {
-            System.err.println("Please give the server's host and port in arguments: <host> <port>");
-            return;
-        }
-
         // Setup the frame
         JFrame frame = new JFrame(TITLE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setBounds((screenSize.width - width) / 2, (screenSize.height - height) / 2, width, height);
+        frame.setBounds((screenSize.width - WIDTH) / 2, (screenSize.height - HEIGHT) / 2, WIDTH, HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JLayeredPane layeredPane = new JLayeredPane();
@@ -66,13 +64,28 @@ public class BipBipClient {
         layeredPane.add(toolPanel, JLayeredPane.PALETTE_LAYER);
 
         // Server Connection handler
-        ServerConnection server = new ServerConnection(new InetSocketAddress(args[0], Integer.parseInt(args[1])));
+        SocketAddress address;
+        if (args.length == 2) {
+            try {
+                address = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port number in arguments: " + args[1]);
+                return;
+            }
+        } else {
+            address = PopupFactory.requestConnectionAddress(DEFAULT_PORT);
+            if (address == null) {
+                return;
+            }
+        }
+
+        ServerConnection server = new ServerConnection(address);
 
         // Infos
         final JLabel infos = new JLabel(" ");
         infos.setForeground(Color.RED);
         toolPanel.add(infos);
-        
+
         // Map
         final ServerPoiModel model = new ServerPoiModel(server);
         final JMap map = new JMap(model);
@@ -85,7 +98,7 @@ public class BipBipClient {
         toolPanel.add(refresh);
 
         frame.setVisible(true);
-        
+
         // Model updater
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {

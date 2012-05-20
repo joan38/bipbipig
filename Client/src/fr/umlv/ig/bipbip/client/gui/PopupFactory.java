@@ -22,11 +22,10 @@ import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.PoiImageFactory;
 import java.awt.Color;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Objects;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
@@ -84,11 +83,37 @@ public final class PopupFactory {
         JMenuItem confirmation = new JMenuItem("Confirm", ImageFactory.getImage("confirm.png"));
         confirmation.addActionListener(ListenerFactory.getConfirmationButtonListener(poi, model, infos));
         popupMenu.add(confirmation);
-        
+
         JMenuItem refutation = new JMenuItem("Not seen", ImageFactory.getImage("delete.png"));
         refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, infos));
         popupMenu.add(refutation);
 
         return popupMenu;
+    }
+
+    public static SocketAddress requestConnectionAddress(int defaultPort) {
+        String input = (String) JOptionPane.showInputDialog(null,
+                "Server address : <host>[:port]",
+                "Connection",
+                JOptionPane.QUESTION_MESSAGE,
+                ImageFactory.getImage("confirm.png"),
+                null,
+                null);
+
+        if (input == null) {
+            return null;
+        } else if (input.matches("[^\\s]+:\\d{1,5}")) {
+            String[] split = input.split(":");
+            return new InetSocketAddress(split[0], Integer.parseInt(split[1]));
+        } else if (input.matches("[^\\s:]+")) {
+            return new InetSocketAddress(input, defaultPort);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                    "Invalid host",
+                    "Error",
+                    JOptionPane.INFORMATION_MESSAGE,
+                    ImageFactory.getImage("delete.png"));
+            return requestConnectionAddress(defaultPort);
+        }
     }
 }
