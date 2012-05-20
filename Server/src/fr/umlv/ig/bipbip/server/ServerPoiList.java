@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class ServerPoiList extends PoiList {
 
     // Debug logger.
-    private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPOIList");
+    private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPoiList");
     
     /**
      * After X refutations, delete the POI.
@@ -48,7 +48,7 @@ public class ServerPoiList extends PoiList {
      *
      * @see #addPOI(fr.umlv.ig.bipbip.poi.POI)
      */
-    public static final double ADD_PRECISION = 10;
+    public static final double ADD_PRECISION = 0.1;
 
     /**
      * Increment the number of refutation of a POI.

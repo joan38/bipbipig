@@ -26,8 +26,12 @@ import fr.umlv.ig.bipbip.server.ServerPoiList;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.*;
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -35,6 +39,8 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableRowSorter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -48,7 +54,7 @@ public class ServerJFrame extends JFrame {
 
     // Connected objects
     private final BipbipServer server;
-    private final Logger clientCommandLogger;
+    private final ArrayList<Logger> loggersToDisplay;
     private ServerPoiList serverPOIList;
     private final DefaultListModel<LogRecord> clientCommandLogList;
     private final POITableModel poiTableModel;
@@ -96,20 +102,31 @@ public class ServerJFrame extends JFrame {
      * Creates a new server frame.
      *
      * @param server Server to connect to.
-     * @param clientCommandLogger Logger that log client commands.
+     * @param loggersToDisplay Collections of loggers to display inside this
+     * window.
      * @param serverPOIList List of points of interests to connect to.
      */
-    public ServerJFrame(BipbipServer server, Logger clientCommandLogger, ServerPoiList serverPOIList) {
-        super("Bipbip server");
+    public ServerJFrame(BipbipServer server, ArrayList<Logger> loggersToDisplay, ServerPoiList serverPOIList) {
+        super("Bipbip server - Port: " + server.getServerPort());
+        Objects.requireNonNull(server);
+        Objects.requireNonNull(loggersToDisplay);
+        Objects.requireNonNull(serverPOIList);
 
-        // Linking with objects. TODO: (Maybe put that outside within a connect method?)
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        this.loggersToDisplay = loggersToDisplay;
+
+        // Linking with objects.
         this.server = server;
-        this.clientCommandLogger = clientCommandLogger;
         this.serverPOIList = serverPOIList;
 
-        // Registering the log.
+        // Registering the loggers.
         clientCommandLogList = new DefaultListModel<LogRecord>();
-        clientCommandLogger.addHandler(new CommandLogHandler());
+
+        CommandLogHandler guiLogHandler = new CommandLogHandler();
+        for (Logger logger : loggersToDisplay) {
+            logger.addHandler(guiLogHandler);
+        }
 
         // Registering the pois table.
         poiTableModel = new POITableModel();
@@ -203,12 +220,22 @@ public class ServerJFrame extends JFrame {
 
         // Table
         poiTable = new JTable(poiTableModel);
-        poiTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        poiTable.setFocusable(false);
+        poiTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         poiTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                ListElementSelected();
+                listElementSelected();
+            }
+        });
+        poiTable.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    editSelectedPoi();
+                }
             }
         });
 
@@ -218,6 +245,165 @@ public class ServerJFrame extends JFrame {
         RowSorter<POITableModel> sorter = new TableRowSorter<POITableModel>(poiTableModel);
         sorter.toggleSortOrder(0);
         poiTable.setRowSorter(sorter);
+
+        // Registering handlers.
+        poiAdd.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createNewPoi();
+            }
+        });
+
+        poiEdit.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editSelectedPoi();
+            }
+        });
+
+        poiRemove.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeSelectedPoi();
+            }
+        });
+
+        menuConnection.addMenuListener(new MenuListener() {
+
+            @Override
+            public void menuSelected(MenuEvent e) {
+                if (ServerJFrame.this.server.getConnected()) {
+                    menuConnectionStart.setEnabled(false);
+                    menuConnectionStop.setEnabled(true);
+                } else {
+                    menuConnectionStart.setEnabled(true);
+                    menuConnectionStop.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+            }
+        });
+
+        menuConnectionStart.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ServerJFrame.this.server.serve();
+            }
+        });
+
+        menuConnectionStop.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ServerJFrame.this.server.disconnect();
+            }
+        });
+
+        // Exit?
+        this.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (askBeforeClose()) {
+                    // Stopping the server.
+                    System.exit(0);
+                }
+            }
+        });
+        
+        menuFileQuit.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (askBeforeClose()) {
+                    // Stopping the server.
+                    System.exit(0);
+                }
+            }
+        });
+        
+        menuHelpAbout.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(ServerJFrame.this, "BipBipServer - BipBip Project\n\nDamien Girard and Joan Goyeau");
+            }
+        });
+
+        listElementSelected();
+    }
+
+    /**
+     * Asks the user if he really want to quit the application.
+     *
+     * @return True if he really want, false otherwise.
+     */
+    private boolean askBeforeClose() {
+        return (JOptionPane.showConfirmDialog(this, "Are you sure you want to close the server?", "Quit BipBipServer", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION);
+    }
+
+    /**
+     * Displays the dialog to create a new POI.
+     */
+    private void createNewPoi() {
+        POIEditJFrame frame = new POIEditJFrame(this, serverPOIList, 0.0, 0.0);
+        frame.setVisible(true);
+    }
+
+    /**
+     * Edits the selected POI in the JTable.
+     */
+    private void editSelectedPoi() {
+        if (poiTable.getSelectedRowCount() != 1) {
+            return;
+        }
+
+        // Getting the selected row;
+        int index = poiTable.getSelectedRow();
+        if (index < 0) {
+            return;
+        }
+        index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
+
+        Poi poi = (Poi) serverPOIList.getPoints().toArray()[index];
+
+        POIEditJFrame frame = new POIEditJFrame(this, serverPOIList, poi);
+        frame.setVisible(true);
+    }
+
+    /**
+     * Asks the user if he really want to delete selected poi, then delete them.
+     */
+    private void removeSelectedPoi() {
+        if (poiTable.getSelectedRowCount() < 1) {
+            return;
+        }
+
+        // Confirmation dialog.
+        if (JOptionPane.showConfirmDialog(this, "Are you sure you want to delete selected point of interest?", "Delete selected POI", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        int[] selectedRows = poiTable.getSelectedRows();
+        Poi[] poiToDeletes = new Poi[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            int index = poiTable.convertRowIndexToModel(selectedRows[i]);
+            poiToDeletes[i] = (Poi) serverPOIList.getPoints().toArray()[index];
+        }
+
+        for (Poi poi : poiToDeletes) {
+            serverPOIList.removePOI(poi);
+        }
     }
 
     /**
@@ -225,7 +411,17 @@ public class ServerJFrame extends JFrame {
      *
      * @param index The line selected in the table.
      */
-    private void ListElementSelected() {
+    private void listElementSelected() {
+        // Multiple row selected or no row selected.
+        poiRemove.setEnabled(poiTable.getSelectedRowCount() >= 1);
+        if (poiTable.getSelectedRowCount() != 1) {
+            poiEdit.setEnabled(false);
+            return;
+        } else {
+            poiEdit.setEnabled(true);
+        }
+
+        // Getting the selected row;
         int index = poiTable.getSelectedRow();
         if (index < 0) {
             return;
@@ -273,7 +469,7 @@ public class ServerJFrame extends JFrame {
     private class POITableModel extends AbstractTableModel {
 
         private final String[] columnNames = {"Date", "Type", "+", "-", "X", "Y"};
-        private final Class[] columnClass = {Date.class, PoiType.class, int.class, int.class, double.class, double.class};
+        private final Class[] columnClass = {Date.class, PoiType.class, Integer.class, Integer.class, Double.class, Double.class};
 
         @Override
         public Class getColumnClass(int column) {
@@ -325,6 +521,10 @@ public class ServerJFrame extends JFrame {
         @Override
         public void publish(LogRecord record) {
             clientCommandLogList.addElement(record);
+            // Scroll to the bottom if not focused.
+            if (clientCommandLog.isFocusOwner() == false) {
+                clientCommandLog.ensureIndexIsVisible(clientCommandLogList.size() - 1);
+            }
         }
 
         @Override
@@ -346,14 +546,23 @@ public class ServerJFrame extends JFrame {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             // Getting the log.
+            DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.DEFAULT);
+
             LogRecord logRecord = (LogRecord) value;
 
-            Component result = super.getListCellRendererComponent(list, logRecord.getMessage(), index, isSelected, cellHasFocus);
-            
-            if (logRecord.getLevel().intValue() == Level.WARNING.intValue())
+            StringBuilder sb = new StringBuilder();
+            sb.append(logRecord.getLevel()).append(": ");
+            sb.append(dateFormatter.format(new Date(logRecord.getMillis()))).append(" - ");
+            sb.append(logRecord.getSourceClassName()).append(": ");
+            sb.append(logRecord.getMessage());
+
+            Component result = super.getListCellRendererComponent(list, sb.toString(), index, isSelected, cellHasFocus);
+
+            if (logRecord.getLevel().intValue() == Level.WARNING.intValue()) {
                 result.setForeground(Color.ORANGE);
-            else if (logRecord.getLevel().intValue() == Level.SEVERE.intValue())
+            } else if (logRecord.getLevel().intValue() == Level.SEVERE.intValue()) {
                 result.setForeground(Color.red);
+            }
 
             return result;
         }

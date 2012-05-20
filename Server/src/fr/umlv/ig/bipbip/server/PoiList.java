@@ -17,6 +17,9 @@
 package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.*;
+import java.io.ObjectOutputStream;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -187,11 +190,36 @@ public class PoiList {
     }
 
     /**
+     * Updates (replace) a POI in the collection.
+     *
+     * Removes the previous Poi and add the new one at the right place. Keeps
+     * the sortedSet in a consistent state.
+     *
+     * Fires a removed and added events.
+     */
+    public void updatePoi(Poi oldPoi, Poi newPoi) {
+        points.remove(oldPoi);
+        points.add(newPoi);
+
+        this.firePOIRemoved(new PoiEvent(this, oldPoi));
+        this.firePOIAdded(new PoiEvent(this, newPoi));
+    }
+
+    /**
+     * Save the list of POI to a file.
+     * 
+     * @param channel Channel where to write bytes.
+     */
+    public void saveToFile(FileChannel channel) {
+        //ObjectOutputStream so = new ObjectOutputStream()
+    }
+
+    /**
      * Dummy POI.
      *
      * Used only to make searches operations easier.
      */
-    private static class DummyPOI extends ReportingPoi {
+    private static class DummyPOI extends AbstractReportedPoi {
 
         private DummyPOI(double positionX, double positionY, PoiType type) {
             super(positionX, positionY, type, new Date());
