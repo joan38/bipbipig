@@ -17,6 +17,7 @@
 package fr.umlv.ig.bipbip.poi;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Point a interest that can be reported by a client.
@@ -39,6 +40,9 @@ public abstract class AbstractReportedPoi implements Poi {
      * @param date Declaration date of the POI.
      */
     public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date) {
+        Objects.requireNonNull(date);
+        Objects.requireNonNull(type);
+        
         this.latitude = latitude;
         this.longitude = longitude;
         this.type = type;
