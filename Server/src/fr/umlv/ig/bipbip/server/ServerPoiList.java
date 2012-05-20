@@ -16,12 +16,28 @@
  */
 package fr.umlv.ig.bipbip.server;
 
+import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
+import fr.umlv.ig.bipbip.poi.PoiType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.XMLConstants;
+import javax.xml.stream.*;
+import javax.xml.transform.stax.StAXSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 /**
  * List of POI, specialized for the server operations.
@@ -93,6 +109,11 @@ public class ServerPoiList extends PoiList {
 
         // OK.
     }
+    
+    /**
+     * Version of the xml file.
+     */
+    private static final Integer xmlVersion = 1;
 
     /**
      * Adds a POI.
@@ -125,5 +146,123 @@ public class ServerPoiList extends PoiList {
         // POI of the type not found, adding a new one so.
         logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so {0}", p);
         super.addPOI(p);
+    }
+    
+     /**
+     * Save the list of POI to a XML file.
+     *
+     * @param output Output stream to write.
+     */
+    public void saveToFile(OutputStream output) throws XMLStreamException {
+        XMLOutputFactory factory = XMLOutputFactory.newInstance();
+        XMLStreamWriter writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(output, "UTF8"));
+
+        writer.writeStartDocument("UTF-8", "1.0");
+
+        writer.writeStartElement("points");
+        writer.writeAttribute("version", xmlVersion.toString());
+
+        // Date formatter.
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
+
+        // Writing the POIs.
+        for (Poi poi : this.getPoints()) {
+            writer.writeStartElement("poi");
+            writer.writeAttribute("type", poi.getType().name());
+            writer.writeAttribute("latitude", ((Double) poi.getLat()).toString());
+            writer.writeAttribute("longitude", ((Double) poi.getLon()).toString());
+            writer.writeAttribute("date", dateFormat.format(poi.getDate()));
+
+            writer.writeStartElement("confirmations");
+            writer.writeCharacters(((Integer) poi.getConfirmations()).toString());
+            writer.writeEndElement();
+
+            writer.writeStartElement("refutations");
+            writer.writeCharacters(((Integer) poi.getRefutations()).toString());
+            writer.writeEndElement();
+
+            writer.writeEndElement();
+        }
+
+        writer.writeEndElement();
+
+        writer.writeEndDocument();
+
+        writer.flush();
+        writer.close();
+    }
+
+    public static ServerPoiList readFromFile(FileInputStream input) throws XMLStreamException, Exception {
+        ServerPoiList poiList = new ServerPoiList();
+        
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLStreamReader reader = factory.createXMLStreamReader(input, "UTF8");
+        
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
+        Poi currentPoi = null;
+
+        // Parsing, gooo!
+        // As this fckin StaX does not support XSD, and I do not have the time to
+        // rewrite everything, I do some sanity check in this code.
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamConstants.START_ELEMENT:
+                    if (reader.getLocalName().equals("points")) {
+                        for (int i = 0; i < reader.getAttributeCount(); i++) {
+                            if (reader.getAttributeLocalName(i).equals("version")) {
+                                // Checking version.
+                                if (reader.getAttributeValue(i).equals(xmlVersion.toString()) == false) {
+                                    throw new Exception("Invalid file version! Found: " + reader.getAttributeValue(i) + " Expected: " + xmlVersion.toString());
+                                }
+                            }
+                        }
+                    } else if (reader.getLocalName().equals("poi")) {
+                        // New Poi.
+                        Double latitude = 0.0, longitude = 0.0;
+                        Date date = null;
+                        PoiType poiType = null;
+
+                        for (int i = 0; i < reader.getAttributeCount(); i++) {
+                            if (reader.getAttributeLocalName(i).equals("latitude")) {
+                                latitude = Double.parseDouble(reader.getAttributeValue(i));
+                            } else if (reader.getAttributeLocalName(i).equals("longitude")) {
+                                longitude = Double.parseDouble(reader.getAttributeValue(i));
+                            } else if (reader.getAttributeLocalName(i).equals("date")) {
+                                date = dateFormat.parse(reader.getAttributeValue(i));
+                            } else if (reader.getAttributeLocalName(i).equals("type")) {
+                                poiType = Enum.valueOf(PoiType.class, reader.getAttributeValue(i));
+                            }
+                        }
+
+                        // Woot, the beautiful non understandable error message.
+                        // Can be translated: You're fucked :)
+                        if (poiType == null)
+                            throw new Exception("Type undefined");
+                        if (date == null)
+                            throw new Exception("Date undefined");
+                        
+                        // Everything is created.
+                        currentPoi = poiType.constructPOI(latitude, longitude, date);
+                    } else if (reader.getLocalName().equals("confirmations")) {
+                        currentPoi.setConfirmations(Integer.parseInt(reader.getElementText()));
+                    } else if (reader.getLocalName().equals("refutations")) {
+                        currentPoi.setNbNotSeen(Integer.parseInt(reader.getElementText()));
+                    }
+                    break;
+                case XMLStreamConstants.END_ELEMENT:
+                    if (reader.getLocalName().equals("poi") && currentPoi != null) {
+                        poiList.addPOI(currentPoi);
+                        currentPoi = null;
+                    }
+                    break;
+                //case XMLStreamConstants.CHARACTERS:
+                    
+                //    break;
+            }
+        }
+        
+        // Finished ;)
+        return poiList;
     }
 }

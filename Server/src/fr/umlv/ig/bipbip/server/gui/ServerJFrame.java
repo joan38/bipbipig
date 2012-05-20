@@ -22,12 +22,15 @@ import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
 import fr.umlv.ig.bipbip.server.BipbipServer;
+import fr.umlv.ig.bipbip.server.PoiList;
 import fr.umlv.ig.bipbip.server.ServerPoiList;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.*;
+import java.io.*;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,9 +44,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
+import javax.xml.stream.XMLStreamException;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
 /**
  * Server window.
@@ -97,6 +105,8 @@ public class ServerJFrame extends JFrame {
     // Table of POI.
     private JScrollPane poiTableScrollPane;
     private JTable poiTable;
+    // File chooser
+    JFileChooser databaseFileChooser;
 
     /**
      * Creates a new server frame.
@@ -218,10 +228,21 @@ public class ServerJFrame extends JFrame {
         poiRemove = new JButton("Remove POI");
         poiToolbar.add(poiRemove);
 
+        // File chooser
+        databaseFileChooser = new JFileChooser();
+        databaseFileChooser.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
+
         // Table
         poiTable = new JTable(poiTableModel);
         poiTable.setFocusable(false);
         poiTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        poiTable.setDefaultRenderer(Date.class, new DefaultTableCellRenderer(){
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                return super.getTableCellRendererComponent(table, DateFormat.getDateTimeInstance().format((Date)value), isSelected, hasFocus, row, column);
+            }
+        });
         poiTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             @Override
@@ -320,7 +341,7 @@ public class ServerJFrame extends JFrame {
                 }
             }
         });
-        
+
         menuFileQuit.addActionListener(new ActionListener() {
 
             @Override
@@ -331,7 +352,7 @@ public class ServerJFrame extends JFrame {
                 }
             }
         });
-        
+
         menuHelpAbout.addActionListener(new ActionListener() {
 
             @Override
@@ -340,7 +361,114 @@ public class ServerJFrame extends JFrame {
             }
         });
 
+        menuFileOpen.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openDatabase();
+            }
+        });
+
+        menuFileSave.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveDatabase();
+            }
+        });
+
         listElementSelected();
+    }
+
+    /**
+     * Asks the user to open a database file.
+     */
+    private void openDatabase() {
+        databaseFileChooser.setDialogTitle("Open a database");
+        if (databaseFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            FileInputStream inputStream;
+            try {
+                inputStream = new FileInputStream(databaseFileChooser.getSelectedFile());
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                // Opening the file.
+                serverPOIList = ServerPoiList.readFromFile(inputStream);
+            } catch (XMLStreamException ex) {
+                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
+                return;
+            } finally {
+                try {
+                    inputStream.close();
+                } catch (IOException ex) {
+                }
+            }
+
+            // Database loaded. Reseting the GUI.
+            poiToJPoi.clear();
+            map.getMapMarkerList().clear();
+
+            // Registering the new list. (MVC)
+            serverPOIList.addPOIListener(new POIEventHandler());
+
+            // Filling the map with the new defined POI.
+            for (Poi poi : serverPOIList.getPoints()) {
+                // Storing the JPOI
+                JPoi jpoi = new JPoi(poi);
+                poiToJPoi.put(poi, jpoi);
+
+                // Displaying the marker.
+                map.addMapMarker(jpoi);
+            }
+
+            // Refreshing the JTables
+            poiTableModel.fireTableStructureChanged();
+
+            poiTable.revalidate();
+            poiTable.repaint();
+            map.repaint();
+        }
+    }
+
+    /**
+     * Asks the user to save the database to a file.
+     */
+    private void saveDatabase() {
+        databaseFileChooser.setDialogTitle("Save the database");
+        if (databaseFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // Handling the extensions.
+            File file = databaseFileChooser.getSelectedFile();
+            if (file.toString().endsWith(".xml") == false) {
+                file = new File(file.getPath() + ".xml");
+            }
+
+            // Opening the file
+            FileOutputStream outputStream;
+            try {
+                outputStream = new FileOutputStream(file);
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while saving the database", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                serverPOIList.saveToFile(outputStream);
+                JOptionPane.showMessageDialog(this, "Database successfully saved\n\nPath: " + file.toString());
+            } catch (XMLStreamException ex) {
+                JOptionPane.showMessageDialog(this, ex, "Error while saving the database", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                try {
+                    outputStream.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
     }
 
     /**

@@ -17,11 +17,18 @@
 package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.*;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import javax.xml.stream.*;
+import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Generic collection of point of interests.
@@ -203,15 +210,6 @@ public class PoiList {
 
         this.firePOIRemoved(new PoiEvent(this, oldPoi));
         this.firePOIAdded(new PoiEvent(this, newPoi));
-    }
-
-    /**
-     * Save the list of POI to a file.
-     * 
-     * @param channel Channel where to write bytes.
-     */
-    public void saveToFile(FileChannel channel) {
-        //ObjectOutputStream so = new ObjectOutputStream()
     }
 
     /**
