@@ -17,10 +17,18 @@
 package fr.umlv.ig.bipbip.client;
 
 import fr.umlv.ig.bipbip.images.ImageFactory;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import javax.swing.*;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -33,7 +41,7 @@ public class BipBipClient {
     private static final int width = 550;
     private static final int height = 450;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         if (args.length < 2) {
             System.err.println("Please give the server's host and port in arguments: <host> <port>");
             return;
@@ -53,30 +61,40 @@ public class BipBipClient {
         toolPanel.setOpaque(false);
         layeredPane.add(toolPanel, JLayeredPane.PALETTE_LAYER);
 
-        // Infos
-        JInfo infos = new JInfo();
-        toolPanel.add(infos);
-
         // Server Connection handler
         ServerConnection server = new ServerConnection(new InetSocketAddress(args[0], Integer.parseInt(args[1])));
 
+        // Infos
+        final JLabel infos = new JLabel(" ");
+        infos.setForeground(Color.RED);
+        toolPanel.add(infos);
+        
         // Map
-        MapPoiModel mapPOIModel = new MapPoiModel();
-        JMap map = new JMap(mapPOIModel);
-        map.addMouseListener(ListenerFactory.getMapInteractionListener(server));
-        MapPoiModelUpdater mapPOIModelUpdater = new MapPoiModelUpdater(mapPOIModel,
-                map,
-                server,
-                POI_UPDATE_INTERVAL);
-        mapPOIModelUpdater.addUpdateListener(infos);
-        new Thread(mapPOIModelUpdater).start();
+        final ServerPoiModel model = new ServerPoiModel(server);
+        final JMap map = new JMap(model);
+        map.addMouseListener(ListenerFactory.getMapInteractionListener(model, infos));
         layeredPane.add(map);
 
         // Refresh button
         JLabel refresh = new JLabel(ImageFactory.getImage("refresh.png"));
-        refresh.addMouseListener(ListenerFactory.getRefreshButtonListener(mapPOIModelUpdater));
+        refresh.addMouseListener(ListenerFactory.getRefreshButtonListener(model, map, infos));
         toolPanel.add(refresh);
 
         frame.setVisible(true);
+        
+        // Model updater
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                try {
+                    model.update(map.getPosition());
+                    infos.setText(" ");
+                } catch (IOException e) {
+                    infos.setText(e.getMessage());
+                }
+            }
+        }, 0, POI_UPDATE_INTERVAL);
     }
 }

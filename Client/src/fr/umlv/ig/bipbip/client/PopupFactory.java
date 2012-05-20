@@ -36,9 +36,6 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
  */
 public final class PopupFactory {
 
-    private static JPopupMenu mapPopupMenu;
-    private static ServerConnection lastServer;
-
     private PopupFactory() {
     }
 
@@ -46,16 +43,15 @@ public final class PopupFactory {
      * Configure a popup menu for adding new POI on the map
      *
      * @param coordinate
-     * @param server
+     * @param model
      * @return
      */
-    public static JPopupMenu getMapPopupMenu(Coordinate coordinate, ServerConnection server) {
-        Objects.requireNonNull(server);
-        if (mapPopupMenu != null && lastServer == server) {
-            return mapPopupMenu;
-        }
+    public static JPopupMenu getMapPopupMenu(Coordinate coordinate, ServerPoiModel model, JLabel infos) {
+        Objects.requireNonNull(coordinate);
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
 
-        mapPopupMenu = new JPopupMenu();
+        JPopupMenu mapPopupMenu = new JPopupMenu();
         JLabel signaler = new JLabel("Signaler");
         signaler.setBorder(new EmptyBorder(1, 10, 1, 0));
         signaler.setForeground(Color.GRAY);
@@ -65,16 +61,17 @@ public final class PopupFactory {
         PoiType[] types = PoiType.values();
         for (PoiType type : types) {
             JMenuItem poiDeclarationItem = new JMenuItem(type.toString(), PoiImageFactory.getImage(type));
-            poiDeclarationItem.addActionListener(ListenerFactory.getSubmitButtonListener(coordinate, type, server));
+            poiDeclarationItem.addActionListener(ListenerFactory.getSubmitButtonListener(coordinate, type, model, infos));
             mapPopupMenu.add(poiDeclarationItem);
         }
 
         return mapPopupMenu;
     }
 
-    public static JPopupMenu getPoiPopupMenu(Poi poi, ServerConnection server) {
+    public static JPopupMenu getPoiPopupMenu(Poi poi, ServerPoiModel model, JLabel infos) {
         Objects.requireNonNull(poi);
-        Objects.requireNonNull(server);
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
 
         JPopupMenu popupMenu = new JPopupMenu();
         JLabel signaler = new JLabel(poi.getType().toString());
@@ -84,11 +81,11 @@ public final class PopupFactory {
         popupMenu.add(new JSeparator());
 
         JMenuItem confirmation = new JMenuItem("Confirm", ImageFactory.getImage("confirm.png"));
-        confirmation.addActionListener(ListenerFactory.getConfirmationButtonListener(poi, server));
+        confirmation.addActionListener(ListenerFactory.getConfirmationButtonListener(poi, model, infos));
         popupMenu.add(confirmation);
         
         JMenuItem refutation = new JMenuItem("Not seen", ImageFactory.getImage("delete.png"));
-        refutation.addActionListener(ListenerFactory.getRefutationButtonListener(poi, server));
+        refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, infos));
         popupMenu.add(refutation);
 
         return popupMenu;

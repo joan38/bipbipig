@@ -29,7 +29,7 @@ public interface PoiModel {
     /**
      * Gets all POIs.
      */
-    public Collection<Poi> getAllPoi();
+    public Collection<Poi> getAll();
 
     /**
      * Adds a POI listener to the collection.

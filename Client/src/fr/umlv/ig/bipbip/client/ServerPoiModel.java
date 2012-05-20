@@ -19,21 +19,47 @@ package fr.umlv.ig.bipbip.client;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 /**
  *
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
-public class MapPoiModel implements PoiModel {
+public class ServerPoiModel implements PoiModel {
 
     private final ConcurrentLinkedDeque<Poi> pois = new ConcurrentLinkedDeque<Poi>();
     private final ConcurrentLinkedDeque<PoiListener> listeners = new ConcurrentLinkedDeque<PoiListener>();
-    
+    private final ServerConnection server;
+
+    public ServerPoiModel(ServerConnection server) {
+        this.server = server;
+    }
+
+    public void update(Coordinate coordinate) throws IOException {
+        try {
+            ArrayList<Poi> newPOIs = (ArrayList<Poi>) server.getPois(coordinate);
+            for (Poi poi : pois) {
+                if (!newPOIs.contains(poi)) {
+                    remove(poi);
+                }
+            }
+            for (Poi poi : newPOIs) {
+                if (!pois.contains(poi)) {
+                    add(poi);
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException("Connection problem: Unable to update POIs", e);
+        }
+    }
+
     @Override
-    public Collection<Poi> getAllPoi() {
+    public Collection<Poi> getAll() {
         return pois;
     }
 
@@ -50,7 +76,7 @@ public class MapPoiModel implements PoiModel {
 
         listeners.remove(listener);
     }
-    
+
     /**
      * Fires the listeners when a POI is added.
      *
@@ -58,7 +84,7 @@ public class MapPoiModel implements PoiModel {
      */
     protected void firePoiAdded(PoiEvent e) {
         Objects.requireNonNull(e);
-        
+
         for (PoiListener listener : listeners) {
             listener.poiAdded(e);
         }
@@ -71,12 +97,12 @@ public class MapPoiModel implements PoiModel {
      */
     protected void firePoiRemoved(PoiEvent e) {
         Objects.requireNonNull(e);
-        
+
         for (PoiListener listener : listeners) {
             listener.poiRemoved(e);
         }
     }
-    
+
     /**
      * Add simply the point to the collection.
      *
@@ -85,22 +111,45 @@ public class MapPoiModel implements PoiModel {
      *
      * @param p POI to add.
      */
-    public void addPoi(Poi poi) {
+    public void add(Poi poi) {
         Objects.requireNonNull(poi);
-        
+
         pois.add(poi);
         firePoiAdded(new PoiEvent(this, poi));
     }
-    
+
     /**
      * Remove simply the point from the collection.
      *
      * @param p POI to add.
      */
-    public void removePoi(Poi poi) {
+    public void remove(Poi poi) {
         Objects.requireNonNull(poi);
-        
+
         pois.remove(poi);
         firePoiRemoved(new PoiEvent(this, poi));
+    }
+
+    public void submit(Poi poi) throws IOException {
+        Objects.requireNonNull(poi);
+
+        try {
+            server.submit(poi);
+            update(new Coordinate(poi.getLat(), poi.getLon()));
+            firePoiAdded(new PoiEvent(this, poi));
+        } catch (IOException e) {
+            throw new IOException("Connection problem: Unable to submit the POI", e);
+        }
+    }
+
+    public void notSeen(Poi poi) throws IOException {
+        Objects.requireNonNull(poi);
+
+        try {
+            server.notSeen(poi);
+            update(new Coordinate(poi.getLat(), poi.getLon()));
+        } catch (IOException e) {
+            throw new IOException("Connection problem: Unable to declare the POI as not seen", e);
+        }
     }
 }

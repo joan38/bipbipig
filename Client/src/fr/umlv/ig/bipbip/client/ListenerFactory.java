@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -46,8 +47,9 @@ public final class ListenerFactory {
      *
      * @return
      */
-    public static MouseListener getMapInteractionListener(final ServerConnection server) {
-        Objects.requireNonNull(server);
+    public static MouseListener getMapInteractionListener(final ServerPoiModel model, final JLabel infos) {
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
         
         return new MouseAdapter() {
 
@@ -60,107 +62,104 @@ public final class ListenerFactory {
                     for (MapMarker mapMarker : mapMarkers) {
                         JPoi jpoi = (JPoi) mapMarker;
                         if (jpoi.getIconArea().contains(mousePosition)) {
-                            PopupFactory.getPoiPopupMenu(jpoi.getPoi(), server).show(map, mousePosition.x, mousePosition.y);
+                            PopupFactory.getPoiPopupMenu(jpoi.getPoi(), model, infos).show(map, mousePosition.x, mousePosition.y);
                             return;
                         }
                     }
 
-                    PopupFactory.getMapPopupMenu(map.getPosition(mousePosition), server).show(map, mousePosition.x, mousePosition.y);
+                    PopupFactory.getMapPopupMenu(map.getPosition(mousePosition), model, infos).show(map, mousePosition.x, mousePosition.y);
                 }
             }
         };
     }
 
-    public static MouseListener getRefreshButtonListener(final MapPoiModelUpdater mapPOIModelUpdater) {
-        Objects.requireNonNull(mapPOIModelUpdater);
+    public static MouseListener getRefreshButtonListener(final ServerPoiModel model, final JMapViewer map, final JLabel infos) {
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(map);
+        Objects.requireNonNull(infos);
         
         return new MouseAdapter() {
 
             @Override
             public void mousePressed(MouseEvent event) {
                 try {
-                    mapPOIModelUpdater.update();
+                    model.update(map.getPosition());
+                    infos.setText(" ");
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    infos.setText(e.getMessage());
                 }
             }
         };
     }
 
-    public static ActionListener getConfirmationButtonListener(final Poi poi, final ServerConnection server) {
+    public static ActionListener getConfirmationButtonListener(final Poi poi, final ServerPoiModel model, final JLabel infos) {
         Objects.requireNonNull(poi);
-        Objects.requireNonNull(server);
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
         
         return new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    server.submit(poi);
+                    model.submit(poi);
+                    infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI confirmed, thank you for your contribution",
                             "POI confirmed",
                             JOptionPane.INFORMATION_MESSAGE,
                             ImageFactory.getImage("confirm.png"));
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    infos.setText(e.getMessage());
                 }
             }
         };
     }
 
-    public static ActionListener getRefutationButtonListener(final Poi poi, final ServerConnection server) {
+    public static ActionListener getNotSeenButtonListener(final Poi poi, final ServerPoiModel model, final JLabel infos) {
         Objects.requireNonNull(poi);
-        Objects.requireNonNull(server);
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
         
         return new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    server.notSeen(poi);
+                    model.notSeen(poi);
+                    infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI declared as not seen, thank you for your contribution",
                             "POI not seen",
                             JOptionPane.INFORMATION_MESSAGE,
                             ImageFactory.getImage("delete.png"));
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    infos.setText(e.getMessage());
                 }
             }
         };
     }
 
-    public static ActionListener getSubmitButtonListener(final Coordinate coordinate, final PoiType type, final ServerConnection server) {
+    public static ActionListener getSubmitButtonListener(final Coordinate coordinate, final PoiType type, final ServerPoiModel model, final JLabel infos) {
         Objects.requireNonNull(coordinate);
         Objects.requireNonNull(type);
-        Objects.requireNonNull(server);
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(infos);
         
         return new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    server.submit(type.constructPOI(coordinate.getLat(), coordinate.getLon(), new Date()));
+                    model.submit(type.constructPOI(coordinate.getLat(), coordinate.getLon(), new Date()));
+                    infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI submitted, thank you for your contribution",
                             "POI submitted",
                             JOptionPane.INFORMATION_MESSAGE,
                             PoiImageFactory.getImage(type));
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    infos.setText(e.getMessage());
                 }
             }
         };

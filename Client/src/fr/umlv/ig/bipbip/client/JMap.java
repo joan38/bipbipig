@@ -39,7 +39,7 @@ public final class JMap extends JMapViewer implements PoiListener {
         Objects.requireNonNull(model);
 
         this.model = model;
-        Collection<Poi> pois = model.getAllPoi();
+        Collection<Poi> pois = model.getAll();
         for (Poi poi : pois) {
             poiAdded(new PoiEvent(this, poi));
         }
