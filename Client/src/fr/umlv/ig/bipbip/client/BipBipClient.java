@@ -16,6 +16,10 @@
  */
 package fr.umlv.ig.bipbip.client;
 
+import fr.umlv.ig.bipbip.client.gui.JMap;
+import fr.umlv.ig.bipbip.client.gui.LayeredLayoutManager;
+import fr.umlv.ig.bipbip.client.gui.ListenerFactory;
+import fr.umlv.ig.bipbip.client.model.ServerPoiModel;
 import fr.umlv.ig.bipbip.images.ImageFactory;
 import java.awt.Color;
 import java.awt.Dimension;

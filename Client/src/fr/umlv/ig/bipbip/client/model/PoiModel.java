@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.client;
+package fr.umlv.ig.bipbip.client.model;
 
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiListener;
