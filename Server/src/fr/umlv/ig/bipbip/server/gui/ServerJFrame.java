@@ -22,7 +22,7 @@ import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
 import fr.umlv.ig.bipbip.server.BipbipServer;
-import fr.umlv.ig.bipbip.server.ServerPOIList;
+import fr.umlv.ig.bipbip.server.ServerPoiList;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -49,7 +49,7 @@ public class ServerJFrame extends JFrame {
     // Connected objects
     private final BipbipServer server;
     private final Logger clientCommandLogger;
-    private ServerPOIList serverPOIList;
+    private ServerPoiList serverPOIList;
     private final DefaultListModel<LogRecord> clientCommandLogList;
     private final POITableModel poiTableModel;
     // For the JMapPanel
@@ -99,7 +99,7 @@ public class ServerJFrame extends JFrame {
      * @param clientCommandLogger Logger that log client commands.
      * @param serverPOIList List of points of interests to connect to.
      */
-    public ServerJFrame(BipbipServer server, Logger clientCommandLogger, ServerPOIList serverPOIList) {
+    public ServerJFrame(BipbipServer server, Logger clientCommandLogger, ServerPoiList serverPOIList) {
         super("Bipbip server");
 
         // Linking with objects. TODO: (Maybe put that outside within a connect method?)

@@ -47,7 +47,7 @@ public enum ClientCommandHandler {
          * something
          */
         @Override
-        public void handle(SocketChannel sc, Scanner scanner, ServerPOIList poiList) throws IOException {
+        public void handle(SocketChannel sc, Scanner scanner, ServerPoiList poiList) throws IOException {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
@@ -109,7 +109,7 @@ public enum ClientCommandHandler {
          * see an event reported by the server
          */
         @Override
-        public void handle(SocketChannel sc, Scanner scanner, ServerPOIList poiList) throws IOException {
+        public void handle(SocketChannel sc, Scanner scanner, ServerPoiList poiList) throws IOException {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
@@ -176,7 +176,7 @@ public enum ClientCommandHandler {
          * where X and Y are double
          */
         @Override
-        public void handle(SocketChannel sc, Scanner scanner, ServerPOIList poiList) throws IOException {
+        public void handle(SocketChannel sc, Scanner scanner, ServerPoiList poiList) throws IOException {
             double latitude, longitude;
             if (!scanner.hasNextDouble()) {
                 throw new IOException("Missing X coordinate");
@@ -213,5 +213,5 @@ public enum ClientCommandHandler {
     // Logger
     private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ClientCommandHandler");
 
-    public abstract void handle(SocketChannel sc, Scanner scanner, ServerPOIList poiList) throws IOException;
+    public abstract void handle(SocketChannel sc, Scanner scanner, ServerPoiList poiList) throws IOException;
 }

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class ServerPOIList extends PoiList {
+public class ServerPoiList extends PoiList {
 
     // Debug logger.
     private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPOIList");

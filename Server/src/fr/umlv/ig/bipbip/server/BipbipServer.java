@@ -49,7 +49,7 @@ public class BipbipServer {
      *
      * Threadsafe :)
      */
-    private ServerPOIList poiList = new ServerPOIList();
+    private ServerPoiList poiList = new ServerPoiList();
 
     /**
      * Instantiates a bipbip server.
@@ -142,7 +142,7 @@ public class BipbipServer {
      *
      * @return The list of POI.
      */
-    public ServerPOIList getPoiList() {
+    public ServerPoiList getPoiList() {
         return poiList;
     }
 
