@@ -72,7 +72,7 @@ public final class PopupFactory {
         return mapPopupMenu;
     }
 
-    public static JPopupMenu getPOIPopupMenu(Poi poi, ServerConnection server) {
+    public static JPopupMenu getPoiPopupMenu(Poi poi, ServerConnection server) {
         Objects.requireNonNull(poi);
         Objects.requireNonNull(server);
 

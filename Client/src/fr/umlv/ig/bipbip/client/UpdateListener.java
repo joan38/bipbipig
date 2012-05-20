@@ -23,6 +23,8 @@ import java.util.EventListener;
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
 public interface UpdateListener extends EventListener {
+    
+    public void updated(UpdateEvent e);
 
     public void updateFailed(UpdateEvent e);
 }

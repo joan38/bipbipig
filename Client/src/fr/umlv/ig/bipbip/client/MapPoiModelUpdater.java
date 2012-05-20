@@ -34,7 +34,7 @@ public class MapPoiModelUpdater implements Runnable {
     private final ServerConnection server;
     private final long updateInterval;
     private final JMapViewer mapViewer;
-    private ConcurrentLinkedDeque<UpdateListener> listeners = new ConcurrentLinkedDeque<UpdateListener>();
+    private final ConcurrentLinkedDeque<UpdateListener> listeners = new ConcurrentLinkedDeque<UpdateListener>();
 
     /**
      *
@@ -70,35 +70,43 @@ public class MapPoiModelUpdater implements Runnable {
 
     public void update() throws IOException {
         try {
-            Collection<Poi> pois = model.getAllPoi();
             ArrayList<Poi> newPOIs = (ArrayList<Poi>) server.getPois(mapViewer.getPosition());
-            for (Poi poi : newPOIs) {
-                if (!pois.contains(poi)) {
-                    model.addPoi(poi);
-                }
-            }
+            Collection<Poi> pois = model.getAllPoi();
             for (Poi poi : pois) {
                 if (!newPOIs.contains(poi)) {
                     model.removePoi(poi);
                 }
             }
-        } catch (IOException e) {
-            for (UpdateListener listener : listeners) {
-                listener.updateFailed(new UpdateEvent(this, e));
+            for (Poi poi : newPOIs) {
+                if (!pois.contains(poi)) {
+                    model.addPoi(poi);
+                }
             }
-            throw e;
+
+            for (UpdateListener listener : listeners) {
+                listener.updated(new UpdateEvent(this, null));
+            }
+        } catch (IOException e) {
+            IOException ex = new IOException("Connection problem: Unable to update POIs", e);
+            for (UpdateListener listener : listeners) {
+                listener.updateFailed(new UpdateEvent(this, ex));
+            }
+            throw ex;
         }
     }
 
     @Override
     public void run() {
-        try {
-            while (!Thread.interrupted()) {
-                Thread.sleep(updateInterval);
+        while (!Thread.interrupted()) {
+            try {
                 update();
+            } catch (IOException e) {
             }
-        } catch (IOException e) {
-        } catch (InterruptedException e) {
+            try {
+                Thread.sleep(updateInterval);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
     }
 }

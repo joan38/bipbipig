@@ -29,13 +29,10 @@ public class JInfo extends JLabel implements UpdateListener {
         super(" ");
     }
 
-    public void updateStarting(UpdateEvent e) {
+    @Override
+    public void updated(UpdateEvent e) {
         setForeground(Color.BLACK);
-        setText("Updating POIs");
-    }
-
-    public void updateFinished(UpdateEvent e) {
-        setText("");
+        setText(" ");
     }
 
     @Override

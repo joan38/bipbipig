@@ -20,6 +20,7 @@ import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.text.ParseException;
@@ -28,9 +29,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.IIOException;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 /**
@@ -41,6 +39,7 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
 public class ServerConnection {
 
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT);
+    private final SocketAddress address;
     private SocketChannel channel;
 
     /**
@@ -61,25 +60,8 @@ public class ServerConnection {
         }
     }
 
-    private ServerConnection() {
-    }
-
-    public static ServerConnection open() throws IOException {
-        ServerConnection server = new ServerConnection();
-        server.channel = SocketChannel.open();
-
-        return server;
-    }
-
-    public static ServerConnection open(InetSocketAddress address) throws IOException {
-        ServerConnection server = new ServerConnection();
-        server.channel = SocketChannel.open(address);
-
-        return server;
-    }
-
-    public boolean connect(InetSocketAddress address) throws IOException {
-        return channel.connect(address);
+    public ServerConnection(InetSocketAddress address) {
+        this.address = address;
     }
 
     /**
@@ -93,11 +75,20 @@ public class ServerConnection {
      */
     public void submit(Poi poi) throws IOException {
         Objects.requireNonNull(poi);
+        
+        if (channel == null || !channel.isConnected()) {
+            try {
+                channel = SocketChannel.open(address);
+            } catch (IOException e) {
+                throw new IOException("Unable to connect to the server", e);
+            }
+        }
 
         String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
+            channel.close();
             throw new IOException("Unable to submit the POI to the server", e);
         }
     }
@@ -105,8 +96,9 @@ public class ServerConnection {
     /**
      * Declare a not seen POI to the server
      *
-     * A NOT_SEEN command is supposed to have the following form: NOT_SEEN <POI
-     * type> <latitude> <longitude> <date> <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * A NOT_SEEN command is supposed to have the following form:
+     * NOT_SEEN <POI type> <latitude> <longitude> <date>
+     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param poi
      * @throws IOException
@@ -114,10 +106,19 @@ public class ServerConnection {
     public void notSeen(Poi poi) throws IOException {
         Objects.requireNonNull(poi);
 
+        if (channel == null || !channel.isConnected()) {
+            try {
+                channel = SocketChannel.open(address);
+            } catch (IOException e) {
+                throw new IOException("Unable to connect to the server", e);
+            }
+        }
+        
         String cmd = "NOT_SEEN " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
+            channel.close();
             throw new IOException("Unable to report the POI as not seen to the server", e);
         }
     }
@@ -125,12 +126,15 @@ public class ServerConnection {
     /**
      * Get all POI around the coordinate from the server
      *
-     * A INFOS command is supposed to have the following form: INFOS N <line_1>
-     * ... <line_N>
+     * A INFOS command is supposed to have the following form:
+     * INFOS N
+     * <line 1>
+     * ...
+     * <line N>
      *
      * where N is the number of lines of information. Each line is of the form:
      *
-     * <line_N> = INFO <POI type> <latitude> <longitude> <date>
+     * <line N> = INFO <POI type> <latitude> <longitude> <date>
      * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param coordinate
@@ -140,20 +144,31 @@ public class ServerConnection {
     public ArrayList<Poi> getPois(Coordinate coordinate) throws IOException {
         Objects.requireNonNull(coordinate);
 
+        if (channel == null || !channel.isConnected()) {
+            try {
+                channel = SocketChannel.open(address);
+            } catch (IOException e) {
+                throw new IOException("No connection", e);
+            }
+        }
+        
         String cmd = "GET_INFOS " + coordinate.getLat() + " " + coordinate.getLon() + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
+            channel.close();
             throw new IOException("Unable to request POIs from the server", e);
         }
 
         Scanner scanner = new Scanner(channel);
         if (!scanner.hasNextLine()) {
+            channel.close();
             throw new IOException("No response from the server");
         }
 
         String line = scanner.nextLine();
         if (!line.matches("INFOS \\d+")) {
+            channel.close();
             throw new IOException("Invalide answer " + line);
         }
 
@@ -161,17 +176,20 @@ public class ServerConnection {
         try {
             nbPoi = Integer.parseInt(line.split(" ")[1]);
         } catch (NumberFormatException e) {
+            channel.close();
             throw new IOException("Invalid number of POI: " + line, e);
         }
 
         ArrayList<Poi> pois = new ArrayList<Poi>();
         for (int i = 0; i < nbPoi; i++) {
             if (!scanner.hasNextLine()) {
+                channel.close();
                 throw new IOException("Missing INFO answer");
             }
             line = scanner.nextLine();
 
             if (!line.matches("INFO (" + Regex.supportedPoiTypes + ") \\-?\\d{1,2}.\\d+ \\-?\\d{1,3}.\\d+ \\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d[+-]\\d\\d\\d\\d")) {
+                channel.close();
                 throw new IOException("Invalide answer " + line);
             }
 
@@ -180,8 +198,10 @@ public class ServerConnection {
             try {
                 pois.add(type.constructPOI(Double.parseDouble(split[2]), Double.parseDouble(split[3]), dateFormat.parse(split[4])));
             } catch (NumberFormatException e) {
+                channel.close();
                 throw new IOException("Invalid coordinate: " + e.getMessage(), e);
             } catch (ParseException e) {
+                channel.close();
                 throw new IOException("Invalid date format: " + split[4], e);
             }
         }

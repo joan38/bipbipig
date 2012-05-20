@@ -29,7 +29,7 @@ import javax.swing.*;
 public class BipBipClient {
 
     private static final String TITLE = "BipBip Client";
-    private static final long POI_UPDATE_INTERVAL = 60000;
+    private static final long POI_UPDATE_INTERVAL = 40000;
     private static final int width = 550;
     private static final int height = 450;
 
@@ -48,7 +48,7 @@ public class BipBipClient {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(new LayeredLayoutManager());
         frame.setContentPane(layeredPane);
-        
+
         JPanel toolPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         toolPanel.setOpaque(false);
         layeredPane.add(toolPanel, JLayeredPane.PALETTE_LAYER);
@@ -56,15 +56,9 @@ public class BipBipClient {
         // Infos
         JInfo infos = new JInfo();
         toolPanel.add(infos);
-        
-        // Connection to the server
-        ServerConnection server = null;
-        try {
-            server = ServerConnection.open();
-            server.connect(new InetSocketAddress(args[0], Integer.parseInt(args[1])));
-        } catch (IOException e) {
-            infos.setText(e.getMessage());
-        }
+
+        // Server Connection handler
+        ServerConnection server = new ServerConnection(new InetSocketAddress(args[0], Integer.parseInt(args[1])));
 
         // Map
         MapPoiModel mapPOIModel = new MapPoiModel();
@@ -77,7 +71,7 @@ public class BipBipClient {
         mapPOIModelUpdater.addUpdateListener(infos);
         new Thread(mapPOIModelUpdater).start();
         layeredPane.add(map);
-        
+
         // Refresh button
         JLabel refresh = new JLabel(ImageFactory.getImage("refresh.png"));
         refresh.addMouseListener(ListenerFactory.getRefreshButtonListener(mapPOIModelUpdater));
