@@ -16,8 +16,8 @@
  */
 package fr.umlv.ig.bipbip.poi.defined;
 
-import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.AbstractReportedPoi;
+import fr.umlv.ig.bipbip.poi.PoiType;
 import java.util.Date;
 
 /**
