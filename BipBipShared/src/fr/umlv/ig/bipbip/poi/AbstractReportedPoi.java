@@ -19,9 +19,9 @@ package fr.umlv.ig.bipbip.poi;
 import java.util.Date;
 
 /**
- * Simple graphic point of interest.
+ * Point a interest that can be reported by a client.
  */
-public abstract class ReportingPoi implements Poi {
+public abstract class AbstractReportedPoi implements Poi {
 
     private final double latitude;
     private final double longitude;
@@ -31,14 +31,14 @@ public abstract class ReportingPoi implements Poi {
     private int refutations;
 
     /**
-     * Creates a simple point of interest. (POI)
+     * Creates a reported point of interest. (POI)
      *
-     * @param latitude X position of the POI.
-     * @param longitude Y position of the POI.
+     * @param latitude Latitude of the POI.
+     * @param longitude Longitude of the POI.
      * @param type Type of the POI.
      * @param date Declaration date of the POI.
      */
-    public ReportingPoi(double latitude, double longitude, PoiType type, Date date) {
+    public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.type = type;
@@ -68,9 +68,9 @@ public abstract class ReportingPoi implements Poi {
     }
 
     /**
-     * Gets the X position of the POI.
+     * Gets the latitude of the POI.
      *
-     * @return The X position.
+     * @return The latitude.
      */
     @Override
     public double getLat() {
@@ -78,9 +78,9 @@ public abstract class ReportingPoi implements Poi {
     }
 
     /**
-     * Gets the Y position of the POI.
+     * Gets the longitude of the POI.
      *
-     * @return The position.
+     * @return The longitude.
      */
     @Override
     public double getLon() {
@@ -118,7 +118,7 @@ public abstract class ReportingPoi implements Poi {
     }
 
     /**
-     * Sets the number of refutations of this POI.
+     * Sets the number of refutation of this POI.
      *
      * @param refutations The number of refuses.
      */
@@ -135,7 +135,7 @@ public abstract class ReportingPoi implements Poi {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ReportingPoi other = (ReportingPoi) obj;
+        final AbstractReportedPoi other = (AbstractReportedPoi) obj;
         if (Double.doubleToLongBits(this.latitude) != Double.doubleToLongBits(other.latitude)) {
             return false;
         }

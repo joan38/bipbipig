@@ -17,7 +17,7 @@
 package fr.umlv.ig.bipbip.poi.defined;
 
 import fr.umlv.ig.bipbip.poi.PoiType;
-import fr.umlv.ig.bipbip.poi.ReportingPoi;
+import fr.umlv.ig.bipbip.poi.AbstractReportedPoi;
 import java.util.Date;
 
 /**
@@ -25,7 +25,7 @@ import java.util.Date;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class RoadWorks extends ReportingPoi {
+public class RoadWorks extends AbstractReportedPoi {
 
     public RoadWorks(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.ROADWORKS, date);

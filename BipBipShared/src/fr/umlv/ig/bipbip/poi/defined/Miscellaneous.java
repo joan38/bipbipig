@@ -17,7 +17,7 @@
 package fr.umlv.ig.bipbip.poi.defined;
 
 import fr.umlv.ig.bipbip.poi.PoiType;
-import fr.umlv.ig.bipbip.poi.ReportingPoi;
+import fr.umlv.ig.bipbip.poi.AbstractReportedPoi;
 import java.util.Date;
 
 /**
@@ -25,7 +25,7 @@ import java.util.Date;
  * 
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class Miscellaneous extends ReportingPoi {
+public class Miscellaneous extends AbstractReportedPoi {
 
     public Miscellaneous(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.MISCELLANEOUS, date);
