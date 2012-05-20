@@ -16,8 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.NetUtils;
-import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.Poi;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -29,14 +28,14 @@ import java.util.ArrayList;
  */
 public class ServerCommand {
 
-    public static void sendInfos(SocketChannel sc, ArrayList<POI> list) throws IOException {
+    public static void sendInfos(SocketChannel sc, ArrayList<Poi> list) throws IOException {
         NetUtils.writeLine(sc, "INFOS " + list.size());
-        for (POI e : list) {
+        for (Poi e : list) {
             sendEventInfo(sc, e);
         }
     }
 
-    private static void sendEventInfo(SocketChannel sc, POI e) throws IOException {
-        NetUtils.writeLine(sc, "INFO " + e.getType().name() + " " + e.getX() + " " + e.getY());
+    private static void sendEventInfo(SocketChannel sc, Poi e) throws IOException {
+        NetUtils.writeLine(sc, "INFO " + e.getType().name() + " " + e.getLat() + " " + e.getLon() + " " + NetUtils.getDateformat().format(e.getDate()));
     }
 }

@@ -16,7 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.poi.POI;
+import fr.umlv.ig.bipbip.poi.Poi;
 import java.util.Comparator;
 
 /**
@@ -27,15 +27,15 @@ import java.util.Comparator;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class POIComparator implements Comparator<POI> {
+public class PoiComparator implements Comparator<Poi> {
 
     @Override
-    public int compare(POI o1, POI o2) {
-        if (o1.getX() > o2.getX() && o1.getY() > o2.getY())
+    public int compare(Poi o1, Poi o2) {
+        if (o1.getLat() > o2.getLat() && o1.getLon() > o2.getLon())
             return 1;
         else if (o1.equals(o2))
             return 0;
         else
             return -1;
+        }
     }
-}

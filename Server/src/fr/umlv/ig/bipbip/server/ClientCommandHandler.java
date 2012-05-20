@@ -16,9 +16,8 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.NetUtils;
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIType;
+import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.poi.PoiType;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -52,11 +51,11 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            POIType event;
+            PoiType event;
             double x, y;
             Date date;
             try {
-                event = POIType.valueOf(scanner.next());
+                event = PoiType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
@@ -89,7 +88,7 @@ public enum ClientCommandHandler {
              * Handling commands
              */
             // Creation of the POI.
-            POI poi = event.constructPOI(x, y, date);
+            Poi poi = event.constructPOI(x, y, date);
 
             // Adding the POI to the collection.
             poiList.addPOI(poi);
@@ -114,11 +113,11 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            POIType event;
+            PoiType event;
             double x, y;
             Date date;
             try {
-                event = POIType.valueOf(scanner.next());
+                event = PoiType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
@@ -148,11 +147,11 @@ public enum ClientCommandHandler {
                 throw new IOException("Invalid date: " + d);
             }
             // Looking for the POI.
-            ArrayList<POI> poiAt = poiList.getPOIAt(x, y, event);
+            ArrayList<Poi> poiAt = poiList.getPOIAt(x, y, event);
 
             // Looking for the POI dates.
-            POI poi = null;
-            for (POI p : poiAt) {
+            Poi poi = null;
+            for (Poi p : poiAt) {
                 if (p.getDate().equals(date)) {
                     poi = p;
                     break;
@@ -167,37 +166,37 @@ public enum ClientCommandHandler {
             logger.log((poi == null) ? Level.WARNING : Level.INFO, "CLIENT: NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
         }
     },
-    GET_INFO {
+    GET_INFOS {
 
         /**
-         * A GET_INFO command is supposed to have the following form:
+         * A GET_INFOS command is supposed to have the following form:
          *
-         * GET_INFO X Y
+         * GET_INFOS X Y
          *
          * where X and Y are double
          */
         @Override
         public void handle(SocketChannel sc, Scanner scanner, ServerPOIList poiList) throws IOException {
-            double x, y;
+            double latitude, longitude;
             if (!scanner.hasNextDouble()) {
                 throw new IOException("Missing X coordinate");
             }
-            x = scanner.nextDouble();
+            latitude = scanner.nextDouble();
             if (!scanner.hasNextDouble()) {
                 throw new IOException("Missing Y coordinate");
             }
-            y = scanner.nextDouble();
+            longitude = scanner.nextDouble();
             /*
              * Retrieving what the client requested.
              */
-            logger.log(Level.INFO, "CLIENT: GET_INFO " + x + " " + y);
+            logger.log(Level.INFO, "CLIENT: GET_INFOS " + latitude + " " + longitude);
 
             // Getting the points 40km square.
-            SortedSet<POI> points = poiList.getPointsBetween(x - squareArea, y - squareArea, x + squareArea, y + squareArea);
+            SortedSet<Poi> points = poiList.getPointsBetween(latitude - SQUARE_AREA, longitude - SQUARE_AREA, latitude + SQUARE_AREA, longitude + SQUARE_AREA);
 
             // Creation of the arraylist.
-            ArrayList<POI> list = new ArrayList<POI>(points.size());
-            for (POI p : points) {
+            ArrayList<Poi> list = new ArrayList<Poi>(points.size());
+            for (Poi p : points) {
                 list.add(p);
             }
 
@@ -210,7 +209,7 @@ public enum ClientCommandHandler {
      *
      * Area of event that will be sent to the client.
      */
-    private static final double squareArea = 0.247;
+    private static final double SQUARE_AREA = 0.247;
     // Logger
     private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ClientCommandHandler");
 

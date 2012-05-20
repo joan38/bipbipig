@@ -16,8 +16,8 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIEvent;
+import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.logging.Level;
@@ -31,15 +31,15 @@ import java.util.logging.Logger;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class ServerPOIList extends POIList {
+public class ServerPOIList extends PoiList {
 
     // Debug logger.
     private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPOIList");
     
     /**
-     * After X refusals, delete the POI.
+     * After X refutations, delete the POI.
      */
-    public final int deleteAfterRefusals = 3;
+    public static final int NB_REFUTATION_FOR_DELETE = 3;
     /**
      * When a POI is added, the server is looking for already existing POI near
      * the position with a precision of this constant.
@@ -48,28 +48,28 @@ public class ServerPOIList extends POIList {
      *
      * @see #addPOI(fr.umlv.ig.bipbip.poi.POI)
      */
-    public final int addPrecision = 10;
+    public static final double ADD_PRECISION = 10;
 
     /**
-     * Increment the number of refusal of a POI.
+     * Increment the number of refutation of a POI.
      *
-     * If the number of refusals > deleteAfterRefusals, then the POI is removed.
+     * If the number of refutations > NB_REFUTATION_FOR_DELETE, then the POI is removed.
      *
      * @param p Point of interest.
      *
-     * @see #deleteAfterRefusals
+     * @see #NB_REFUTATION_FOR_DELETE
      */
-    public void notSeen(POI p) {
-        ArrayList<POI> list = getPOIAt(p.getX(), p.getY(), p.getType());
+    public void notSeen(Poi p) {
+        ArrayList<Poi> list = getPOIAt(p.getLat(), p.getLon(), p.getType());
         if (list.isEmpty()) // POI not found.
         {
-            logger.log(Level.INFO, "Not seen: Request of a POI not found. x: {0} y: {1}", new Object[]{p.getX(), p.getY()});
+            logger.log(Level.INFO, "Not seen: Request of a POI not found. x: {0} y: {1}", new Object[]{p.getLat(), p.getLon()});
             return;
         }
 
-        POI poiToUse = null;
+        Poi poiToUse = null;
 
-        for (POI poi : list) {
+        for (Poi poi : list) {
             if (poi.getDate().equals(p.getDate())) {
                 // POI found.
                 poiToUse = poi;
@@ -83,12 +83,12 @@ public class ServerPOIList extends POIList {
         }
 
         // POI get, marking it as notSeen.
-        int refusals = poiToUse.getRefusals() + 1;
-        if (refusals >= deleteAfterRefusals) {
+        int refutations = poiToUse.getRefutations() + 1;
+        if (refutations >= NB_REFUTATION_FOR_DELETE) {
             removePOI(poiToUse);
         } else {
-            poiToUse.setRefusals(refusals);
-            firePOIUpdated(new POIEvent(this, poiToUse));
+            poiToUse.setNbNotSeen(refutations);
+            firePOIUpdated(new PoiEvent(this, poiToUse));
         }
 
         // OK.
@@ -104,8 +104,8 @@ public class ServerPOIList extends POIList {
      * @see #addPrecision
      */
     @Override
-    public void addPOI(POI p) {
-        SortedSet<POI> pointsBetween = getPointsBetween(p.getX() - addPrecision, p.getY() - addPrecision, p.getX() + addPrecision, p.getY() + addPrecision);
+    public void addPOI(Poi p) {
+        SortedSet<Poi> pointsBetween = getPointsBetween(p.getLat() - ADD_PRECISION, p.getLon() - ADD_PRECISION, p.getLat() + ADD_PRECISION, p.getLon() + ADD_PRECISION);
 
         if (pointsBetween.isEmpty()) {
             super.addPOI(p);
@@ -113,11 +113,11 @@ public class ServerPOIList extends POIList {
         }
 
         // POI founds, checking for the type and incrementing the number of confirmations.
-        for (POI poi : pointsBetween) {
+        for (Poi poi : pointsBetween) {
             if (poi.getType().equals(p.getType())) {
                 logger.log(Level.FINE, "Confirmation of {0}", poi);
                 poi.setConfirmations(poi.getConfirmations() + 1);
-                firePOIUpdated(new POIEvent(this, poi));
+                firePOIUpdated(new PoiEvent(this, poi));
                 return;
             }
         }

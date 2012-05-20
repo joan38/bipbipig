@@ -28,21 +28,21 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class POIList {
+public class PoiList {
 
-    private final SortedSet<POI> points;
-    private final ConcurrentLinkedDeque<POIListener> listeners;
+    private final SortedSet<Poi> points;
+    private final ConcurrentLinkedDeque<PoiListener> listeners;
     /**
      * Precision of the searches operations on the POI collection.
      */
-    public final double precision = 0.5;
+    public static final double PRECISION = 0.5;
 
     /**
      * Create an empty list of POI.
      */
-    public POIList() {
-        points = Collections.synchronizedSortedSet(new TreeSet<POI>(new POIComparator()));
-        listeners = new ConcurrentLinkedDeque<POIListener>();
+    public PoiList() {
+        points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
+        listeners = new ConcurrentLinkedDeque<PoiListener>();
     }
 
     /**
@@ -50,7 +50,7 @@ public class POIList {
      *
      * @param listener The POIListener to be added.
      */
-    public void addPOIListener(POIListener listener) {
+    public void addPOIListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
         listeners.add(listener);
@@ -61,7 +61,7 @@ public class POIList {
      *
      * @param listener The POIListener to be removed.
      */
-    public void removePOIListener(POIListener listener) {
+    public void removePOIListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
         listeners.remove(listener);
@@ -72,8 +72,8 @@ public class POIList {
      *
      * @param e Event.
      */
-    protected void firePOIAdded(POIEvent e) {
-        for (POIListener listener : listeners) {
+    protected void firePOIAdded(PoiEvent e) {
+        for (PoiListener listener : listeners) {
             listener.poiAdded(e);
         }
     }
@@ -83,8 +83,8 @@ public class POIList {
      *
      * @param e Event.
      */
-    protected void firePOIUpdated(POIEvent e) {
-        for (POIListener listener : listeners) {
+    protected void firePOIUpdated(PoiEvent e) {
+        for (PoiListener listener : listeners) {
             listener.poiUpdated(e);
         }
     }
@@ -94,8 +94,8 @@ public class POIList {
      *
      * @param e Event.
      */
-    protected void firePOIRemoved(POIEvent e) {
-        for (POIListener listener : listeners) {
+    protected void firePOIRemoved(PoiEvent e) {
+        for (PoiListener listener : listeners) {
             listener.poiRemoved(e);
         }
     }
@@ -108,10 +108,10 @@ public class POIList {
      *
      * @param p POI to add.
      */
-    public void addPOI(POI p) {
+    public void addPOI(Poi p) {
         points.add(p);
 
-        firePOIAdded(new POIEvent(this, p));
+        firePOIAdded(new PoiEvent(this, p));
     }
 
     /**
@@ -119,25 +119,25 @@ public class POIList {
      *
      * @param p POI to add.
      */
-    public void removePOI(POI p) {
+    public void removePOI(Poi p) {
         points.remove(p);
 
-        firePOIRemoved(new POIEvent(this, p));
+        firePOIRemoved(new PoiEvent(this, p));
     }
 
     /**
      * Returns all POI contained between the two designed points.
      *
-     * @param x1 X position of the first point.
-     * @param y1 Y position of the first point.
-     * @param x2 X position of the second point.
-     * @param y2 Y position of the second point.
+     * @param latitude1 X position of the first point.
+     * @param longitude1 Y position of the first point.
+     * @param latitude2 X position of the second point.
+     * @param longitude2 Y position of the second point.
      *
      * @return A list of all POI contained between those two points.
      */
-    public SortedSet<POI> getPointsBetween(Double x1, Double y1, Double x2, Double y2) {
-        POI p1 = new DummyPOI(x1, y1, POIType.MISCELLANEOUS);
-        POI p2 = new DummyPOI(x2, y2, POIType.MISCELLANEOUS);
+    public SortedSet<Poi> getPointsBetween(double latitude1, double longitude1, double latitude2, double longitude2) {
+        Poi p1 = new DummyPOI(latitude1, longitude1, PoiType.MISCELLANEOUS);
+        Poi p2 = new DummyPOI(latitude2, longitude2, PoiType.MISCELLANEOUS);
 
         return points.subSet(p1, p2);
     }
@@ -154,14 +154,14 @@ public class POIList {
      *
      * @return A list of POI found at this position.
      */
-    public ArrayList<POI> getPOIAt(Double x, Double y, POIType type) {
-        POI p1 = new DummyPOI(x - precision, y - precision, type);
-        POI p2 = new DummyPOI(x + precision, y + precision, type);
+    public ArrayList<Poi> getPOIAt(Double x, Double y, PoiType type) {
+        Poi p1 = new DummyPOI(x - PRECISION, y - PRECISION, type);
+        Poi p2 = new DummyPOI(x + PRECISION, y + PRECISION, type);
 
-        ArrayList<POI> result = new ArrayList<POI>();
+        ArrayList<Poi> result = new ArrayList<Poi>();
 
-        SortedSet<POI> list = points.subSet(p1, p2);
-        for (POI poi : list) {
+        SortedSet<Poi> list = points.subSet(p1, p2);
+        for (Poi poi : list) {
             if (poi.getType().equals(type)) {
                 result.add(poi);
             }
@@ -173,7 +173,7 @@ public class POIList {
     /**
      * Gets the points.
      */
-    public SortedSet<POI> getPoints() {
+    public SortedSet<Poi> getPoints() {
         return points;
     }
 
@@ -191,10 +191,10 @@ public class POIList {
      *
      * Used only to make searches operations easier.
      */
-    private static class DummyPOI extends SimplePOI {
+    private static class DummyPOI extends ReportingPoi {
 
-        public DummyPOI(double positionX, double positionY, POIType type) {
-            super(positionX, positionY, type);
+        private DummyPOI(double positionX, double positionY, PoiType type) {
+            super(positionX, positionY, type, new Date());
         }
     }
 }

@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip;
+package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.defined.FixedSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.MobileSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.RoadWorks;
-import fr.umlv.ig.bipbip.server.ClientCommandHandler;
-import fr.umlv.ig.bipbip.server.ServerPOIList;
 import fr.umlv.ig.bipbip.server.gui.ServerJFrame;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.logging.ConsoleHandler;
@@ -108,7 +107,7 @@ public class BipbipServer {
      */
     private void serveClient(final SocketChannel sc) {
         System.out.println("Dealing with client...");
-        Scanner scanner = new Scanner(sc, NetUtils.getCharset().name());
+        Scanner scanner = new Scanner(sc);
         try {
             while (scanner.hasNextLine()) {
                 System.out.println("lecture depuis le réseau");
@@ -190,13 +189,13 @@ public class BipbipServer {
         server.serve();
         
         // Some dummy points.
-        server.getPoiList().addPOI(new FixedSpeedCam(50, 50));
-        server.getPoiList().addPOI(new MobileSpeedCam(100, 100));
-        server.getPoiList().addPOI(new RoadWorks(2.709975, 48.836659));
+        server.getPoiList().addPOI(new FixedSpeedCam(50, 50, new Date()));
+        server.getPoiList().addPOI(new MobileSpeedCam(100, 100, new Date()));
+        server.getPoiList().addPOI(new RoadWorks(48.836659, 2.709975, new Date()));
 
         // Launching the server GUI.
         ServerJFrame frame = new ServerJFrame(server, clientCommandLogger, server.getPoiList());
-        frame.setSize(500, 500);
+        frame.setSize(800, 500);
         frame.setVisible(true);
 
         Scanner scanner = new Scanner(System.in);

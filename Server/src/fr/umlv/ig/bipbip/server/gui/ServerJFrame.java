@@ -16,12 +16,12 @@
  */
 package fr.umlv.ig.bipbip.server.gui;
 
-import fr.umlv.ig.bipbip.BipbipServer;
-import fr.umlv.ig.bipbip.poi.POIType;
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIEvent;
-import fr.umlv.ig.bipbip.poi.POIListener;
-import fr.umlv.ig.bipbip.poi.swing.JPOI;
+import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
+import fr.umlv.ig.bipbip.poi.PoiListener;
+import fr.umlv.ig.bipbip.poi.PoiType;
+import fr.umlv.ig.bipbip.poi.swing.JPoi;
+import fr.umlv.ig.bipbip.server.BipbipServer;
 import fr.umlv.ig.bipbip.server.ServerPOIList;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,7 +53,7 @@ public class ServerJFrame extends JFrame {
     private final DefaultListModel<LogRecord> clientCommandLogList;
     private final POITableModel poiTableModel;
     // For the JMapPanel
-    private final HashMap<POI, JPOI> POItoJPOI = new HashMap<POI, JPOI>();
+    private final HashMap<Poi, JPoi> poiToJPoi = new HashMap<Poi, JPoi>();
     //
     // GUI objects.
     //
@@ -173,10 +173,10 @@ public class ServerJFrame extends JFrame {
         map = new JMapViewer();
 
         // Filling the map with the already defined POI.
-        for (POI poi : serverPOIList.getPoints()) {
+        for (Poi poi : serverPOIList.getPoints()) {
             // Storing the JPOI
-            JPOI jpoi = new JPOI(poi);
-            POItoJPOI.put(poi, jpoi);
+            JPoi jpoi = new JPoi(poi);
+            poiToJPoi.put(poi, jpoi);
 
             // Displaying the marker.
             map.addMapMarker(jpoi);
@@ -218,8 +218,6 @@ public class ServerJFrame extends JFrame {
         RowSorter<POITableModel> sorter = new TableRowSorter<POITableModel>(poiTableModel);
         sorter.toggleSortOrder(0);
         poiTable.setRowSorter(sorter);
-
-        // Over.
     }
 
     /**
@@ -234,38 +232,38 @@ public class ServerJFrame extends JFrame {
         }
         index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
 
-        POI poi = (POI) serverPOIList.getPoints().toArray()[index];
-        map.setDisplayPositionByLatLon(poi.getY(), poi.getX(), 4);
+        Poi poi = (Poi) serverPOIList.getPoints().toArray()[index];
+        map.setDisplayPositionByLatLon(poi.getLat(), poi.getLon(), map.getZoom());
     }
 
     /**
      * Handles the updates of the poi collection.
      */
-    private class POIEventHandler implements POIListener {
+    private class POIEventHandler implements PoiListener {
 
         @Override
-        public void poiAdded(POIEvent e) {
+        public void poiAdded(PoiEvent e) {
             poiTableModel.fireTableDataChanged();
 
             // Storing the JPOI
-            JPOI jpoi = new JPOI(e.getPoi());
-            POItoJPOI.put(e.getPoi(), jpoi);
+            JPoi jpoi = new JPoi(e.getPoi());
+            poiToJPoi.put(e.getPoi(), jpoi);
 
             // Displaying the marker.
             map.addMapMarker(jpoi);
         }
 
         @Override
-        public void poiUpdated(POIEvent e) {
+        public void poiUpdated(PoiEvent e) {
             poiTableModel.fireTableDataChanged();
         }
 
         @Override
-        public void poiRemoved(POIEvent e) {
+        public void poiRemoved(PoiEvent e) {
             poiTableModel.fireTableDataChanged();
 
             // Removing the marker.
-            map.removeMapMarker(POItoJPOI.get(e.getPoi()));
+            map.removeMapMarker(poiToJPoi.get(e.getPoi()));
         }
     }
 
@@ -275,7 +273,7 @@ public class ServerJFrame extends JFrame {
     private class POITableModel extends AbstractTableModel {
 
         private final String[] columnNames = {"Date", "Type", "+", "-", "X", "Y"};
-        private final Class[] columnClass = {Date.class, POIType.class, int.class, int.class, double.class, double.class};
+        private final Class[] columnClass = {Date.class, PoiType.class, int.class, int.class, double.class, double.class};
 
         @Override
         public Class getColumnClass(int column) {
@@ -299,7 +297,7 @@ public class ServerJFrame extends JFrame {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            POI poi = (POI) serverPOIList.getPoints().toArray()[rowIndex];
+            Poi poi = (Poi) serverPOIList.getPoints().toArray()[rowIndex];
             switch (columnIndex) {
                 case 0:
                     return poi.getDate();
@@ -308,11 +306,11 @@ public class ServerJFrame extends JFrame {
                 case 2:
                     return poi.getConfirmations();
                 case 3:
-                    return poi.getRefusals();
+                    return poi.getRefutations();
                 case 4:
-                    return poi.getX();
+                    return poi.getLat();
                 case 5:
-                    return poi.getY();
+                    return poi.getLon();
                 default:
                     throw new UnsupportedOperationException("Unknown column");
             }
