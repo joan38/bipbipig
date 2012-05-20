@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip;
+package fr.umlv.ig.bipbip.client;
 
-import fr.umlv.ig.bipbip.poi.POI;
-import fr.umlv.ig.bipbip.poi.POIEvent;
-import fr.umlv.ig.bipbip.poi.POIListener;
-import fr.umlv.ig.bipbip.poi.POIModel;
-import fr.umlv.ig.bipbip.poi.swing.JPOI;
-import java.util.ArrayList;
+import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
+import fr.umlv.ig.bipbip.poi.PoiListener;
+import fr.umlv.ig.bipbip.poi.swing.JPoi;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -30,44 +29,44 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  *
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
-public final class JMap extends JMapViewer implements POIListener {
+public final class JMap extends JMapViewer implements PoiListener {
 
-    POIModel model;
-    HashMap<POI, JPOI> poiToJPOI = new HashMap<POI, JPOI>();
+    PoiModel model;
+    HashMap<Poi, JPoi> poiToJPOI = new HashMap<Poi, JPoi>();
 
-    public JMap(POIModel model) {
+    public JMap(PoiModel model) {
         super();
         Objects.requireNonNull(model);
 
         this.model = model;
-        ArrayList<POI> pois = model.getAllPOI();
-        for (POI poi : pois) {
-            poiAdded(new POIEvent(this, poi));
+        Collection<Poi> pois = model.getAllPoi();
+        for (Poi poi : pois) {
+            poiAdded(new PoiEvent(this, poi));
         }
-        model.addPOIListener(this);
+        model.addPoiListener(this);
     }
 
     @Override
-    public void poiAdded(POIEvent e) {
+    public void poiAdded(PoiEvent e) {
         Objects.requireNonNull(e);
 
-        POI poi = e.getPoi();
-        JPOI jpoi = new JPOI(poi);
+        Poi poi = e.getPoi();
+        JPoi jpoi = new JPoi(poi);
         poiToJPOI.put(poi, jpoi);
         addMapMarker(jpoi);
     }
 
     @Override
-    public void poiRemoved(POIEvent e) {
+    public void poiRemoved(PoiEvent e) {
         Objects.requireNonNull(e);
         
-        POI poi = e.getPoi();
+        Poi poi = e.getPoi();
         removeMapMarker(poiToJPOI.get(poi));
         poiToJPOI.remove(poi);
     }
 
     @Override
-    public void poiUpdated(POIEvent e) {
+    public void poiUpdated(PoiEvent e) {
         repaint();
     }
 }
