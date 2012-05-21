@@ -21,8 +21,7 @@ import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
-import fr.umlv.ig.bipbip.server.BipbipServer;
-import fr.umlv.ig.bipbip.server.data.PoiList;
+import fr.umlv.ig.bipbip.server.Server;
 import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -30,7 +29,6 @@ import java.awt.Component;
 import java.awt.event.*;
 import java.io.*;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,14 +42,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.xml.stream.XMLStreamException;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
 /**
  * Server window.
@@ -61,7 +57,7 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 public class ServerJFrame extends JFrame {
 
     // Connected objects
-    private final BipbipServer server;
+    private final Server server;
     private final ArrayList<Logger> loggersToDisplay;
     private ServerPoiList serverPOIList;
     private final DefaultListModel<LogRecord> clientCommandLogList;
@@ -116,8 +112,8 @@ public class ServerJFrame extends JFrame {
      * window.
      * @param serverPOIList List of points of interests to connect to.
      */
-    public ServerJFrame(BipbipServer server, ArrayList<Logger> loggersToDisplay, ServerPoiList serverPOIList) {
-        super("Bipbip server - Port: " + server.getServerPort());
+    public ServerJFrame(Server server, ArrayList<Logger> loggersToDisplay, ServerPoiList serverPOIList) {
+        super("Bipbip server - Port: " + server.getPort());
         Objects.requireNonNull(server);
         Objects.requireNonNull(loggersToDisplay);
         Objects.requireNonNull(serverPOIList);
@@ -153,15 +149,21 @@ public class ServerJFrame extends JFrame {
         menuBar.add(menuFile);
 
         menuFileOpen = new JMenuItem("Open a database");
+        menuFileOpen.setAccelerator(KeyStroke.getKeyStroke('O', java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        menuFileOpen.setMnemonic('o');
         menuFile.add(menuFileOpen);
 
         menuFileSave = new JMenuItem("Save the database");
+        menuFileSave.setAccelerator(KeyStroke.getKeyStroke('S', java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        menuFileSave.setMnemonic('s');
         menuFile.add(menuFileSave);
 
         // Separator.
         menuFile.add(new JSeparator());
 
         menuFileQuit = new JMenuItem("Quit");
+        menuFileQuit.setAccelerator(KeyStroke.getKeyStroke('Q', java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        menuFileQuit.setMnemonic('q');
         menuFile.add(menuFileQuit);
 
         // Menu connection
@@ -169,9 +171,11 @@ public class ServerJFrame extends JFrame {
         menuBar.add(menuConnection);
 
         menuConnectionStart = new JMenuItem("Start server");
+        menuConnectionStart.setMnemonic('s');
         menuConnection.add(menuConnectionStart);
 
         menuConnectionStop = new JMenuItem("Stop server");
+        menuConnectionStop.setMnemonic('o');
         menuConnection.add(menuConnectionStop);
 
         // Menu help
@@ -179,6 +183,7 @@ public class ServerJFrame extends JFrame {
         menuBar.add(menuHelp);
 
         menuHelpAbout = new JMenuItem("About BipBip server...");
+        menuHelpAbout.setAccelerator(KeyStroke.getKeyStroke("F1"));
         menuHelp.add(menuHelpAbout);
 
         // Horizontal Split pane.
@@ -236,11 +241,11 @@ public class ServerJFrame extends JFrame {
         poiTable = new JTable(poiTableModel);
         poiTable.setFocusable(false);
         poiTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        poiTable.setDefaultRenderer(Date.class, new DefaultTableCellRenderer(){
+        poiTable.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                return super.getTableCellRendererComponent(table, DateFormat.getDateTimeInstance().format((Date)value), isSelected, hasFocus, row, column);
+                return super.getTableCellRendererComponent(table, DateFormat.getDateTimeInstance().format((Date) value), isSelected, hasFocus, row, column);
             }
         });
         poiTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -384,6 +389,8 @@ public class ServerJFrame extends JFrame {
      * Asks the user to open a database file.
      */
     private void openDatabase() {
+        boolean serverIsRunning = server.getConnected();
+
         databaseFileChooser.setDialogTitle("Open a database");
         if (databaseFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             FileInputStream inputStream;
@@ -392,6 +399,18 @@ public class ServerJFrame extends JFrame {
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
                 return;
+            }
+
+            // If the server is running, telling the user that it has to be stopped
+            // in order to load the new database.
+            // (No concurrency problem so)
+            if (serverIsRunning) {
+                if (JOptionPane.showConfirmDialog(this, "You must stop the server in order to load the new database.\n\nDo you want to stop the server and open the new database?", "Open a database", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.CANCEL_OPTION) {
+                    return;
+                }
+
+                // Disconnecting.
+                server.disconnect();
             }
 
             try {
@@ -433,13 +452,22 @@ public class ServerJFrame extends JFrame {
             poiTable.revalidate();
             poiTable.repaint();
             map.repaint();
+
+            if (serverIsRunning) {
+                if (JOptionPane.showConfirmDialog(this, "Database loaded.\n\nDo you want to restart the server?", "Open a database", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+                    server.serve();
+                }
+            }
         }
     }
 
     /**
      * Asks the user to save the database to a file.
+     *
+     * @return false If the user canceled the save operation of if there is an
+     * exception.
      */
-    private void saveDatabase() {
+    private boolean saveDatabase() {
         databaseFileChooser.setDialogTitle("Save the database");
         if (databaseFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             // Handling the extensions.
@@ -454,7 +482,7 @@ public class ServerJFrame extends JFrame {
                 outputStream = new FileOutputStream(file);
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while saving the database", JOptionPane.ERROR_MESSAGE);
-                return;
+                return false;
             }
 
             try {
@@ -462,12 +490,17 @@ public class ServerJFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Database successfully saved\n\nPath: " + file.toString());
             } catch (XMLStreamException ex) {
                 JOptionPane.showMessageDialog(this, ex, "Error while saving the database", JOptionPane.ERROR_MESSAGE);
+                return false;
             } finally {
                 try {
                     outputStream.close();
                 } catch (IOException ex) {
                 }
             }
+
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -477,7 +510,18 @@ public class ServerJFrame extends JFrame {
      * @return True if he really want, false otherwise.
      */
     private boolean askBeforeClose() {
-        return (JOptionPane.showConfirmDialog(this, "Are you sure you want to close the server?", "Quit BipBipServer", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION);
+        if (JOptionPane.showConfirmDialog(this, "Are you sure you want to close the server?", "Quit BipBipServer", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            int res = JOptionPane.showConfirmDialog(this, "Do you want to save the database?");
+            switch (res) {
+                case JOptionPane.YES_OPTION:
+                    return saveDatabase();
+                case JOptionPane.CANCEL_OPTION:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -649,10 +693,6 @@ public class ServerJFrame extends JFrame {
         @Override
         public void publish(LogRecord record) {
             clientCommandLogList.addElement(record);
-            // Scroll to the bottom if not focused.
-            if (clientCommandLog.isFocusOwner() == false) {
-                clientCommandLog.ensureIndexIsVisible(clientCommandLogList.size() - 1);
-            }
         }
 
         @Override
@@ -681,7 +721,7 @@ public class ServerJFrame extends JFrame {
             StringBuilder sb = new StringBuilder();
             sb.append(logRecord.getLevel()).append(": ");
             sb.append(dateFormatter.format(new Date(logRecord.getMillis()))).append(" - ");
-            sb.append(logRecord.getSourceClassName()).append(": ");
+            sb.append(logRecord.getLoggerName()).append(": ");
             sb.append(logRecord.getMessage());
 
             Component result = super.getListCellRendererComponent(list, sb.toString(), index, isSelected, cellHasFocus);
