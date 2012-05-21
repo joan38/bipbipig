@@ -484,7 +484,7 @@ public class ServerJFrame extends JFrame {
      * Displays the dialog to create a new POI.
      */
     private void createNewPoi() {
-        POIEditJFrame frame = new POIEditJFrame(this, serverPOIList, 0.0, 0.0);
+        PoiEditJFrame frame = new PoiEditJFrame(this, serverPOIList, 0.0, 0.0);
         frame.setVisible(true);
     }
 
@@ -505,7 +505,7 @@ public class ServerJFrame extends JFrame {
 
         Poi poi = (Poi) serverPOIList.getPoints().toArray()[index];
 
-        POIEditJFrame frame = new POIEditJFrame(this, serverPOIList, poi);
+        PoiEditJFrame frame = new PoiEditJFrame(this, serverPOIList, poi);
         frame.setVisible(true);
     }
 

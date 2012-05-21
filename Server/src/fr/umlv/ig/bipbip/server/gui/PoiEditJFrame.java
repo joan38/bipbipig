@@ -34,7 +34,7 @@ import javax.swing.*;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class POIEditJFrame extends JDialog {
+public class PoiEditJFrame extends JDialog {
 
     private final ServerPoiList poiList;
     private Poi editedPOI = null;
@@ -215,7 +215,7 @@ public class POIEditJFrame extends JDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                POIEditJFrame.this.setVisible(false);
+                PoiEditJFrame.this.setVisible(false);
             }
         });
         actionPanel.add(cancelButton);
@@ -256,7 +256,7 @@ public class POIEditJFrame extends JDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                POIEditJFrame.this.setVisible(false);
+                PoiEditJFrame.this.setVisible(false);
             }
         });
         actionPanel.add(cancelButton);
@@ -279,7 +279,7 @@ public class POIEditJFrame extends JDialog {
      * @param latitude Latitude.
      * @param longitude Longitude.
      */
-    public POIEditJFrame(Frame frame, ServerPoiList poiList, Double latitude, Double longitude) {
+    public PoiEditJFrame(Frame frame, ServerPoiList poiList, Double latitude, Double longitude) {
         super(frame, true);
 
         Objects.requireNonNull(poiList);
@@ -301,7 +301,7 @@ public class POIEditJFrame extends JDialog {
      * @param poiList List of POI.
      * @param poiToEdit POI to edit.
      */
-    public POIEditJFrame(Frame frame, ServerPoiList poiList, Poi poiToEdit) {
+    public PoiEditJFrame(Frame frame, ServerPoiList poiList, Poi poiToEdit) {
         super(frame, true);
 
         Objects.requireNonNull(poiList);
@@ -325,7 +325,7 @@ public class POIEditJFrame extends JDialog {
      * @return A new POI.
      */
     private Poi createPoiFromData() {
-        Poi newPoi = ((PoiType) typeCombobox.getSelectedItem()).constructPOI(((Number) latitudeField.getValue()).doubleValue(),
+        Poi newPoi = ((PoiType) typeCombobox.getSelectedItem()).constructPoi(((Number) latitudeField.getValue()).doubleValue(),
                 ((Number) longitudeField.getValue()).doubleValue(),
                 (Date) dateField.getValue());
         

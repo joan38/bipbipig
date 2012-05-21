@@ -17,7 +17,6 @@ public final class NetUtils {
         if (!line.endsWith("\n")) {
             line = line + "\n";
         }
-        System.out.println(line);
         sc.write(ByteBuffer.wrap(line.getBytes()));
     }
 

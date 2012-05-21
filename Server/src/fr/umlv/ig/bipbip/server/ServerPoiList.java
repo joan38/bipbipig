@@ -16,28 +16,19 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiType;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.XMLConstants;
 import javax.xml.stream.*;
-import javax.xml.transform.stax.StAXSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 /**
  * List of POI, specialized for the server operations.
@@ -155,7 +146,7 @@ public class ServerPoiList extends PoiList {
      */
     public void saveToFile(OutputStream output) throws XMLStreamException {
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
-        XMLStreamWriter writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(output, "UTF8"));
+        XMLStreamWriter writer = factory.createXMLStreamWriter(output, "UTF8");
 
         writer.writeStartDocument("UTF-8", "1.0");
 
@@ -243,7 +234,7 @@ public class ServerPoiList extends PoiList {
                             throw new Exception("Date undefined");
                         
                         // Everything is created.
-                        currentPoi = poiType.constructPOI(latitude, longitude, date);
+                        currentPoi = poiType.constructPoi(latitude, longitude, date);
                     } else if (reader.getLocalName().equals("confirmations")) {
                         currentPoi.setConfirmations(Integer.parseInt(reader.getElementText()));
                     } else if (reader.getLocalName().equals("refutations")) {

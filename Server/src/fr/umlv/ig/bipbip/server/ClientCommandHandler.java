@@ -39,7 +39,7 @@ public enum ClientCommandHandler {
         /**
          * A SUBMIT command is supposed to have the following form:
          *
-         * SUBMIT EVENT X Y DATE
+         * SUBMIT EVENT X Y DATE NB_CONFIRMATION
          *
          * where X and Y are double, and DATE is a full Date in the US locale.
          *
@@ -70,7 +70,7 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Missing time coordinate");
             }
-            String d = scanner.nextLine();
+            String d = scanner.next();
             try {
                 /*
                  * We have to remove leading spaces, because they will disturb
@@ -84,16 +84,17 @@ public enum ClientCommandHandler {
                 e.printStackTrace();
                 throw new IOException("Invalid date: " + d);
             }
+            int confirmations = scanner.nextInt();
             /*
              * Handling commands
              */
             // Creation of the POI.
-            Poi poi = event.constructPOI(x, y, date);
+            Poi poi = event.constructPoi(x, y, date, confirmations);
 
             // Adding the POI to the collection.
             poiList.addPOI(poi);
 
-            logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
+            logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
         }
     },
     NOT_SEEN {

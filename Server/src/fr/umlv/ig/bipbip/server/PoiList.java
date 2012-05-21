@@ -17,18 +17,9 @@
 package fr.umlv.ig.bipbip.server;
 
 import fr.umlv.ig.bipbip.poi.*;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import javax.xml.stream.*;
-import org.xml.sax.ext.DefaultHandler2;
-import org.xml.sax.helpers.DefaultHandler;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Generic collection of point of interests.
@@ -40,8 +31,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class PoiList {
 
-    private final SortedSet<Poi> points;
-    private final ConcurrentLinkedDeque<PoiListener> listeners;
+    private final SortedSet<Poi> points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
+    private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
     /**
      * Precision of the searches operations on the POI collection.
      */
@@ -51,8 +42,6 @@ public class PoiList {
      * Create an empty list of POI.
      */
     public PoiList() {
-        points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
-        listeners = new ConcurrentLinkedDeque<PoiListener>();
     }
 
     /**
