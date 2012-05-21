@@ -35,7 +35,10 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -55,7 +58,7 @@ public class ServerJFrame extends JFrame {
     private final ArrayList<Logger> loggersToDisplay;
     private ServerPoiList serverPOIList;
     private final LogListModel clientCommandLogList;
-    private final POITableModel poiTableModel;
+    private final PoiTableModel poiTableModel;
     // For the JMapPanel
     private final HashMap<Poi, JPoi> poiToJPoi = new HashMap<Poi, JPoi>();
     //
@@ -92,6 +95,7 @@ public class ServerJFrame extends JFrame {
     private JButton poiAdd;
     private JButton poiEdit;
     private JButton poiRemove;
+    private JButton poiHistory;
     // Table of POI.
     private JScrollPane poiTableScrollPane;
     private JTable poiTable;
@@ -129,7 +133,7 @@ public class ServerJFrame extends JFrame {
         }
 
         // Registering the pois table.
-        poiTableModel = new POITableModel();
+        poiTableModel = new PoiTableModel(serverPOIList);
         serverPOIList.addPOIListener(new POIEventHandler());
 
         // Creation of the GUI.
@@ -233,16 +237,7 @@ public class ServerJFrame extends JFrame {
         databaseFileChooser.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
 
         // Table
-        poiTable = new JTable(poiTableModel);
-        poiTable.setFocusable(false);
-        poiTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        poiTable.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
-
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                return super.getTableCellRendererComponent(table, DateFormat.getDateTimeInstance().format((Date) value), isSelected, hasFocus, row, column);
-            }
-        });
+        poiTable = new JPoiTable(map, serverPOIList, poiTableModel);
         poiTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             @Override
@@ -263,7 +258,7 @@ public class ServerJFrame extends JFrame {
         poiTableScrollPane = new JScrollPane(poiTable);
         poiPanel.add(poiTableScrollPane, BorderLayout.CENTER);
 
-        RowSorter<POITableModel> sorter = new TableRowSorter<POITableModel>(poiTableModel);
+        RowSorter<PoiTableModel> sorter = new TableRowSorter<PoiTableModel>(poiTableModel);
         sorter.toggleSortOrder(0);
         poiTable.setRowSorter(sorter);
 
@@ -441,11 +436,11 @@ public class ServerJFrame extends JFrame {
                 map.addMapMarker(jpoi);
             }
 
-            // Refreshing the JTables
-            poiTableModel.fireTableStructureChanged();
+            // Updating the JTables
+            poiTable.setModel(new PoiTableModel(serverPOIList));
 
-            poiTable.revalidate();
-            poiTable.repaint();
+            //poiTable.revalidate();
+            //poiTable.repaint();
             map.repaint();
 
             if (serverIsRunning) {
@@ -583,20 +578,9 @@ public class ServerJFrame extends JFrame {
         poiRemove.setEnabled(poiTable.getSelectedRowCount() >= 1);
         if (poiTable.getSelectedRowCount() != 1) {
             poiEdit.setEnabled(false);
-            return;
         } else {
             poiEdit.setEnabled(true);
         }
-
-        // Getting the selected row;
-        int index = poiTable.getSelectedRow();
-        if (index < 0) {
-            return;
-        }
-        index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
-
-        Poi poi = (Poi) serverPOIList.getPoints().toArray()[index];
-        map.setDisplayPositionByLatLon(poi.getLat(), poi.getLon(), map.getZoom());
     }
 
     /**
@@ -631,56 +615,6 @@ public class ServerJFrame extends JFrame {
     }
 
     /**
-     * Table model of the list of active POI.
-     */
-    private class POITableModel extends AbstractTableModel {
-
-        private final String[] columnNames = {"Date", "Type", "+", "-", "X", "Y"};
-        private final Class[] columnClass = {Date.class, PoiType.class, Integer.class, Integer.class, Double.class, Double.class};
-
-        @Override
-        public Class getColumnClass(int column) {
-            return columnClass[column];
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return columnNames[column];
-        }
-
-        @Override
-        public int getColumnCount() {
-            return columnNames.length;
-        }
-
-        @Override
-        public int getRowCount() {
-            return serverPOIList.getPoints().size();
-        }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Poi poi = (Poi) serverPOIList.getPoints().toArray()[rowIndex];
-            switch (columnIndex) {
-                case 0:
-                    return poi.getDate();
-                case 1:
-                    return poi.getType();
-                case 2:
-                    return poi.getConfirmations();
-                case 3:
-                    return poi.getRefutations();
-                case 4:
-                    return poi.getLat();
-                case 5:
-                    return poi.getLon();
-                default:
-                    throw new UnsupportedOperationException("Unknown column");
-            }
-        }
-    }
-
-    /**
      * Handles the log event operations.
      */
     private class CommandLogHandler extends Handler {
@@ -701,6 +635,11 @@ public class ServerJFrame extends JFrame {
         }
     }
 
+    /**
+     * Model displaying the logs.
+     * 
+     * Thread safe.
+     */
     private class LogListModel extends AbstractListModel<LogRecord> {
         private List<LogRecord> list = Collections.synchronizedList(new ArrayList<LogRecord>());
         
