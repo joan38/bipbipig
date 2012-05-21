@@ -29,19 +29,13 @@ import java.awt.Component;
 import java.awt.event.*;
 import java.io.*;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
+import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -60,7 +54,7 @@ public class ServerJFrame extends JFrame {
     private final Server server;
     private final ArrayList<Logger> loggersToDisplay;
     private ServerPoiList serverPOIList;
-    private final DefaultListModel<LogRecord> clientCommandLogList;
+    private final LogListModel clientCommandLogList;
     private final POITableModel poiTableModel;
     // For the JMapPanel
     private final HashMap<Poi, JPoi> poiToJPoi = new HashMap<Poi, JPoi>();
@@ -127,7 +121,7 @@ public class ServerJFrame extends JFrame {
         this.serverPOIList = serverPOIList;
 
         // Registering the loggers.
-        clientCommandLogList = new DefaultListModel<LogRecord>();
+        clientCommandLogList = new LogListModel();
 
         CommandLogHandler guiLogHandler = new CommandLogHandler();
         for (Logger logger : loggersToDisplay) {
@@ -192,6 +186,7 @@ public class ServerJFrame extends JFrame {
 
         // Log
         clientCommandLog = new JList(clientCommandLogList);
+        clientCommandLog.setPrototypeCellValue(new LogRecord(Level.OFF, "1"));
         clientCommandScrollPane = new JScrollPane(clientCommandLog);
         horizontalSplitPane.setBottomComponent(clientCommandScrollPane);
 
@@ -692,7 +687,7 @@ public class ServerJFrame extends JFrame {
 
         @Override
         public void publish(LogRecord record) {
-            clientCommandLogList.addElement(record);
+            clientCommandLogList.add(record);
         }
 
         @Override
@@ -703,6 +698,40 @@ public class ServerJFrame extends JFrame {
         @Override
         public void close() throws SecurityException {
             // Nothing to do.
+        }
+    }
+
+    private class LogListModel extends AbstractListModel<LogRecord> {
+        private List<LogRecord> list = Collections.synchronizedList(new ArrayList<LogRecord>());
+        
+        public void add(LogRecord record) {
+            list.add(record);
+            fireIntervalAdded(this, list.size() - 1, list.size());
+            
+            // Scroll to bottom.
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    clientCommandLog.ensureIndexIsVisible(list.size() - 1);
+                }
+            });
+        }
+        
+        public void clear(){
+            int size = list.size();
+            list.clear();
+            fireIntervalRemoved(this, 0, size);
+        }
+
+        @Override
+        public int getSize() {
+            return list.size();
+        }
+
+        @Override
+        public LogRecord getElementAt(int index) {
+            return list.get(index);
         }
     }
 
