@@ -19,7 +19,7 @@ package fr.umlv.ig.bipbip.server.gui;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.PoiImageFactory;
-import fr.umlv.ig.bipbip.server.ServerPoiList;
+import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
