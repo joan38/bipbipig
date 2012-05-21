@@ -152,7 +152,7 @@ public final class ListenerFactory {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    model.submit(type.constructPOI(coordinate.getLat(), coordinate.getLon(), new Date()));
+                    model.submit(type.constructPoi(coordinate.getLat(), coordinate.getLon(), new Date()));
                     infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI submitted, thank you for your contribution",

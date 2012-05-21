@@ -69,7 +69,7 @@ public class ServerConnection {
      * Sumit a new POI to the server
      *
      * A SUBMIT command is supposed to have the following form:
-     * SUBMIT <POI type> <latitude> <longitude> <date>
+     * SUBMIT <POI type> <latitude> <longitude> <date> <nb confirmation>
      * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param poi
@@ -86,7 +86,7 @@ public class ServerConnection {
             }
         }
 
-        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + "\n";
+        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + " " +  poi.getConfirmations() + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
@@ -136,7 +136,7 @@ public class ServerConnection {
      *
      * where N is the number of lines of information. Each line is of the form:
      *
-     * <line N> = INFO <POI type> <latitude> <longitude> <date>
+     * <line N> = INFO <POI type> <latitude> <longitude> <date> <nb confirmation>
      * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param coordinate
@@ -190,7 +190,7 @@ public class ServerConnection {
             }
             line = scanner.nextLine();
 
-            if (!line.matches("INFO (" + Regex.supportedPoiTypes + ") \\-?\\d{1,2}.\\d+ \\-?\\d{1,3}.\\d+ \\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d[+-]\\d\\d\\d\\d")) {
+            if (!line.matches("INFO (" + Regex.supportedPoiTypes + ") \\-?\\d{1,2}.\\d+ \\-?\\d{1,3}.\\d+ \\d\\d\\d\\d\\-\\d\\d\\-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d[+-]\\d\\d\\d\\d \\d+")) {
                 channel.close();
                 throw new IOException("Invalide answer " + line);
             }
@@ -198,10 +198,10 @@ public class ServerConnection {
             String[] split = line.split(" ");
             PoiType type = PoiType.valueOf(split[1]);
             try {
-                pois.add(type.constructPOI(Double.parseDouble(split[2]), Double.parseDouble(split[3]), dateFormat.parse(split[4])));
+                pois.add(type.constructPoi(Double.parseDouble(split[2]), Double.parseDouble(split[3]), dateFormat.parse(split[4]), Integer.parseInt(split[5])));
             } catch (NumberFormatException e) {
                 channel.close();
-                throw new IOException("Invalid coordinate: " + e.getMessage(), e);
+                throw new IOException("Invalid answer: " + e.getMessage(), e);
             } catch (ParseException e) {
                 channel.close();
                 throw new IOException("Invalid date format: " + split[4], e);

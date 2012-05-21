@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 /**
@@ -33,8 +34,8 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
  */
 public class ServerPoiModel implements PoiModel {
 
-    private final ConcurrentLinkedDeque<Poi> pois = new ConcurrentLinkedDeque<Poi>();
-    private final ConcurrentLinkedDeque<PoiListener> listeners = new ConcurrentLinkedDeque<PoiListener>();
+    private final ConcurrentLinkedQueue<Poi> pois = new ConcurrentLinkedQueue<Poi>();
+    private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
     private final ServerConnection server;
 
     public ServerPoiModel(ServerConnection server) {
