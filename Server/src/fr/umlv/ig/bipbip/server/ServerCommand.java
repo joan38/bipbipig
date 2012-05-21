@@ -36,6 +36,6 @@ public class ServerCommand {
     }
 
     private static void sendEventInfo(SocketChannel sc, Poi e) throws IOException {
-        NetUtils.writeLine(sc, "INFO " + e.getType().name() + " " + e.getLat() + " " + e.getLon() + " " + NetUtils.getDateformat().format(e.getDate()));
+        NetUtils.writeLine(sc, "INFO " + e.getType().name() + " " + e.getLat() + " " + e.getLon() + " " + NetUtils.getDateformat().format(e.getDate()) + " " + e.getConfirmations());
     }
 }

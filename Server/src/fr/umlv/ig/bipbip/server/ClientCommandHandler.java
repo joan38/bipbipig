@@ -16,6 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server;
 
+import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import java.io.IOException;
@@ -148,7 +149,7 @@ public enum ClientCommandHandler {
                 throw new IOException("Invalid date: " + d);
             }
             // Looking for the POI.
-            ArrayList<Poi> poiAt = poiList.getPOIAt(x, y, event);
+            ArrayList<Poi> poiAt = poiList.getPoiAt(x, y, event);
 
             // Looking for the POI dates.
             Poi poi = null;
@@ -193,16 +194,10 @@ public enum ClientCommandHandler {
             logger.log(Level.INFO, "CLIENT: GET_INFOS " + latitude + " " + longitude);
 
             // Getting the points 40km square.
-            SortedSet<Poi> points = poiList.getPointsBetween(latitude - SQUARE_AREA, longitude - SQUARE_AREA, latitude + SQUARE_AREA, longitude + SQUARE_AREA);
-
-            // Creation of the arraylist.
-            ArrayList<Poi> list = new ArrayList<Poi>(points.size());
-            for (Poi p : points) {
-                list.add(p);
-            }
+            ArrayList<Poi> points = poiList.getPointsBetween(latitude + SQUARE_AREA, longitude - SQUARE_AREA, latitude - SQUARE_AREA, longitude + SQUARE_AREA);
 
             // Sending the answer.
-            ServerCommand.sendInfos(sc, list);
+            ServerCommand.sendInfos(sc, points);
         }
     };
     /**
@@ -210,7 +205,7 @@ public enum ClientCommandHandler {
      *
      * Area of event that will be sent to the client.
      */
-    private static final double SQUARE_AREA = 0.247;
+    private static final double SQUARE_AREA = 2.0;    // TODO: Changer lpour la formule Cos Sin
     // Logger
     private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ClientCommandHandler");
 

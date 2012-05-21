@@ -16,13 +16,13 @@
  */
 package fr.umlv.ig.bipbip.server;
 
+import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import fr.umlv.ig.bipbip.poi.defined.FixedSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.MobileSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.RoadWorks;
 import fr.umlv.ig.bipbip.server.gui.ServerJFrame;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -33,8 +33,6 @@ import java.util.Scanner;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * BipBip server.
