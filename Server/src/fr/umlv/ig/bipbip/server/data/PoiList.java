@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class PoiList {
 
-    private final SortedSet<Poi> points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparatorSouthEast()));
+    private final SortedSet<Poi> points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
     private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
     /**
      * Precision of the searches operations on the POI collection.
@@ -138,12 +138,11 @@ public class PoiList {
         Poi p2 = new DummyPOI(latitude2, longitude2);
 
         ArrayList<Poi> result = new ArrayList<Poi>();
-        PoiComparatorNorthWest poiComparatorNorthWest = new PoiComparatorNorthWest();
-        SortedSet<Poi> pointsSouthEast = points.subSet(p1, p2);
+        SortedSet<Poi> pointsSouthEast = points.subSet(p2, p1);
         for (Poi poi : pointsSouthEast) {
-            //if (poiComparatorNorthWest.compare(poi, p2) >= 0) {
+            if (points.comparator().compare(poi, p2) >= 0) {
                 result.add(poi);
-            //}
+            }
         }
 
         return result;
@@ -166,7 +165,7 @@ public class PoiList {
         Poi p2 = new DummyPOI(latitude - PRECISION, longitude + PRECISION, type);
 
         ArrayList<Poi> result = new ArrayList<Poi>();
-        PoiComparatorNorthWest poiComparatorNorthWest = new PoiComparatorNorthWest();
+        PoiComparator poiComparatorNorthWest = new PoiComparator();
         SortedSet<Poi> list = points.subSet(p1, p2);
         for (Poi poi : list) {
             if (poiComparatorNorthWest.compare(poi, p2) >= 0 && poi.getType().equals(type)) {

@@ -27,11 +27,11 @@ import java.util.Comparator;
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
-public class PoiComparatorSouthEast implements Comparator<Poi> {
+public class PoiComparator implements Comparator<Poi> {
 
     @Override
     public int compare(Poi o1, Poi o2) {
-        if (o1.getLat() < o2.getLat() && o1.getLon() > o2.getLon()) {
+        if (o2.getLat() < o1.getLat() && o2.getLon() > o1.getLon()) {
             return 1;
         } else if (o1.getLat() == o2.getLat() && o1.getLon() == o2.getLon()) {
             return 0;
