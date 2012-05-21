@@ -78,11 +78,11 @@ public class ServerCommunication implements Runnable {
             synchronized (ssc) {
                 try {
                     sc = ssc.accept();
-                    logger.log(Level.INFO, "Accept {0}", sc.getRemoteAddress().toString());
+                    logger.log(Level.INFO, "Accept "+ sc.getRemoteAddress().toString());
                 } catch (ClosedChannelException e) {
                     return; // Terminating the thread. Server is closed.
                 } catch (IOException e) {
-                    logger.log(Level.WARNING, "Accept {0}", e.getLocalizedMessage());
+                    logger.log(Level.WARNING, "Accept "+ e.getLocalizedMessage());
                     continue;
                 }
 
@@ -110,7 +110,7 @@ public class ServerCommunication implements Runnable {
         scanner = new Scanner(sc);
         try {
             while (requestShutdown.get() == false && scanner.hasNextLine()) {
-                logger.log(Level.FINE, "Lecture depuis le réseau. {0}", sc.getRemoteAddress().toString());
+                logger.log(Level.FINE, "Lecture depuis le réseau. "+ sc.getRemoteAddress().toString());
                 String line = scanner.nextLine();
                 Scanner tmp_scanner = new Scanner(line);
                 if (!tmp_scanner.hasNext()) {
@@ -126,7 +126,7 @@ public class ServerCommunication implements Runnable {
             }
         } catch (IOException ie) {
             if (requestShutdown.get() != true) { // Ignoring the error message if shutdown is requested.
-                logger.log(Level.SEVERE, "{0}", ie.getLocalizedMessage());
+                logger.log(Level.SEVERE, ie.getLocalizedMessage());
             }
         } finally {
             logger.info("...end of client connection");

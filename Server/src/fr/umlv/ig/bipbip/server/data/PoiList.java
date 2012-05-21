@@ -30,7 +30,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class PoiList {
 
-    private final SortedSet<Poi> points = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
+    // Contains the currently active points.
+    private final SortedSet<Poi> activePoints = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
+    // Contains all the points ever added or removed.
+    private final Map<Poi, Date> points = Collections.synchronizedMap(new HashMap<Poi, Date>());
+    
     private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
     /**
      * Precision of the searches operations on the POI collection.
@@ -107,7 +111,10 @@ public class PoiList {
      * @param p POI to add.
      */
     public void addPOI(Poi p) {
-        points.add(p);
+        activePoints.add(p);
+        
+        // Storing the history poi.
+        points.put(p, null);
 
         firePOIAdded(new PoiEvent(this, p));
     }
@@ -118,7 +125,9 @@ public class PoiList {
      * @param p POI to add.
      */
     public void removePOI(Poi p) {
-        points.remove(p);
+        activePoints.remove(p);
+        
+        points.put(p, new Date()); // Marking the POI as removed.
 
         firePOIRemoved(new PoiEvent(this, p));
     }
@@ -138,9 +147,9 @@ public class PoiList {
         Poi p2 = new DummyPOI(latitude2, longitude2);
 
         ArrayList<Poi> result = new ArrayList<Poi>();
-        SortedSet<Poi> pointsSouthEast = points.subSet(p2, p1);
+        SortedSet<Poi> pointsSouthEast = activePoints.subSet(p2, p1);
         for (Poi poi : pointsSouthEast) {
-            if (points.comparator().compare(poi, p2) >= 0) {
+            if (activePoints.comparator().compare(poi, p2) >= 0) {
                 result.add(poi);
             }
         }
@@ -166,7 +175,7 @@ public class PoiList {
 
         ArrayList<Poi> result = new ArrayList<Poi>();
         PoiComparator poiComparatorNorthWest = new PoiComparator();
-        SortedSet<Poi> list = points.subSet(p1, p2);
+        SortedSet<Poi> list = activePoints.subSet(p1, p2);
         for (Poi poi : list) {
             if (poiComparatorNorthWest.compare(poi, p2) >= 0 && poi.getType().equals(type)) {
                 result.add(poi);
@@ -180,6 +189,15 @@ public class PoiList {
      * Gets the points.
      */
     public SortedSet<Poi> getPoints() {
+        return activePoints;
+    }
+
+    /**
+     * Gets all points.
+     * 
+     * @return A map that contains all points, including the removed one. The Date in the map is when the element has been removed. (Set to null)
+     */
+    public Map<Poi, Date> getAllPoints() {
         return points;
     }
 
@@ -189,7 +207,7 @@ public class PoiList {
      * @return The number of POI.
      */
     public int getSize() {
-        return points.size();
+        return activePoints.size();
     }
 
     /**
@@ -201,8 +219,8 @@ public class PoiList {
      * Fires a removed and added events.
      */
     public void updatePoi(Poi oldPoi, Poi newPoi) {
-        points.remove(oldPoi);
-        points.add(newPoi);
+        activePoints.remove(oldPoi);
+        activePoints.add(newPoi);
 
         this.firePOIRemoved(new PoiEvent(this, oldPoi));
         this.firePOIAdded(new PoiEvent(this, newPoi));
@@ -218,7 +236,7 @@ public class PoiList {
         private DummyPOI(double latitude, double longitude) {
             super(latitude, longitude, PoiType.MISCELLANEOUS, new Date());
         }
-        
+
         private DummyPOI(double latitude, double longitude, PoiType type) {
             super(latitude, longitude, type, new Date());
         }

@@ -17,10 +17,13 @@
 package fr.umlv.ig.bipbip.server.gui;
 
 import fr.umlv.ig.bipbip.poi.Poi;
-import fr.umlv.ig.bipbip.server.data.PoiList;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
+import fr.umlv.ig.bipbip.poi.PoiListener;
+import fr.umlv.ig.bipbip.poi.swing.JPoi;
 import java.awt.Component;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -43,13 +46,11 @@ public class JPoiTable extends JTable {
      * Creates the JTable.
      *
      * @param map The map linked with this Poi table.
-     * @param poiList The list of Poi displaying in this table.
      * @param dm The PoiTableModel of this JTable.
      */
-    public JPoiTable(JMapViewer map, PoiList poiList, PoiTableModel dm) {
+    public JPoiTable(JMapViewer map, PoiTableModel dm) {
         super(dm);
         Objects.requireNonNull(map);
-        Objects.requireNonNull(poiList);
 
         this.map = map;
 
@@ -94,7 +95,7 @@ public class JPoiTable extends JTable {
         index = this.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
 
         PoiTableModel model = (PoiTableModel) this.getModel();
-        
+
         Poi poi = (Poi) model.getPoiList().getPoints().toArray()[index];
         map.setDisplayPositionByLatLon(poi.getLat(), poi.getLon(), map.getZoom());
     }

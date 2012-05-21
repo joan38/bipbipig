@@ -133,7 +133,7 @@ public class ServerJFrame extends JFrame {
         }
 
         // Registering the pois table.
-        poiTableModel = new PoiTableModel(serverPOIList);
+        poiTableModel = new PoiTableModel(serverPOIList, false);
         serverPOIList.addPOIListener(new POIEventHandler());
 
         // Creation of the GUI.
@@ -237,7 +237,7 @@ public class ServerJFrame extends JFrame {
         databaseFileChooser.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
 
         // Table
-        poiTable = new JPoiTable(map, serverPOIList, poiTableModel);
+        poiTable = new JPoiTable(map, poiTableModel);
         poiTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             @Override
@@ -437,7 +437,7 @@ public class ServerJFrame extends JFrame {
             }
 
             // Updating the JTables
-            poiTable.setModel(new PoiTableModel(serverPOIList));
+            poiTable.setModel(new PoiTableModel(serverPOIList, false));
 
             //poiTable.revalidate();
             //poiTable.repaint();
@@ -584,14 +584,12 @@ public class ServerJFrame extends JFrame {
     }
 
     /**
-     * Handles the updates of the poi collection.
+     * Handles the updates of the poi collection on the map.
      */
     private class POIEventHandler implements PoiListener {
 
         @Override
         public void poiAdded(PoiEvent e) {
-            poiTableModel.fireTableDataChanged();
-
             // Storing the JPOI
             JPoi jpoi = new JPoi(e.getPoi());
             poiToJPoi.put(e.getPoi(), jpoi);
@@ -602,13 +600,10 @@ public class ServerJFrame extends JFrame {
 
         @Override
         public void poiUpdated(PoiEvent e) {
-            poiTableModel.fireTableDataChanged();
         }
 
         @Override
         public void poiRemoved(PoiEvent e) {
-            poiTableModel.fireTableDataChanged();
-
             // Removing the marker.
             map.removeMapMarker(poiToJPoi.get(e.getPoi()));
         }

@@ -19,14 +19,15 @@ package fr.umlv.ig.bipbip.server.data;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiType;
-import fr.umlv.ig.bipbip.server.data.PoiList;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-import java.util.SortedSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.stream.*;
@@ -40,10 +41,8 @@ import javax.xml.stream.*;
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
 public class ServerPoiList extends PoiList {
-
     // Debug logger.
-    private static final Logger logger = Logger.getLogger("fr.umlv.ig.bipbip.server.ServerPoiList");
-    
+    private static final Logger logger = Logger.getLogger(PoiList.class.getName());
     /**
      * After X refutations, delete the POI.
      */
@@ -61,7 +60,8 @@ public class ServerPoiList extends PoiList {
     /**
      * Increment the number of refutation of a POI.
      *
-     * If the number of refutations > NB_REFUTATION_FOR_DELETE, then the POI is removed.
+     * If the number of refutations > NB_REFUTATION_FOR_DELETE, then the POI is
+     * removed.
      *
      * @param p Point of interest.
      *
@@ -101,7 +101,6 @@ public class ServerPoiList extends PoiList {
 
         // OK.
     }
-    
     /**
      * Version of the xml file.
      */
@@ -139,8 +138,8 @@ public class ServerPoiList extends PoiList {
         logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so {0}", p);
         super.addPOI(p);
     }
-    
-     /**
+
+    /**
      * Save the list of POI to a XML file.
      *
      * @param output Output stream to write.
@@ -186,10 +185,10 @@ public class ServerPoiList extends PoiList {
 
     public static ServerPoiList readFromFile(FileInputStream input) throws XMLStreamException, Exception {
         ServerPoiList poiList = new ServerPoiList();
-        
+
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLStreamReader reader = factory.createXMLStreamReader(input, "UTF8");
-        
+
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
         Poi currentPoi = null;
 
@@ -229,11 +228,13 @@ public class ServerPoiList extends PoiList {
 
                         // Woot, the beautiful non understandable error message.
                         // Can be translated: You're fucked :)
-                        if (poiType == null)
+                        if (poiType == null) {
                             throw new Exception("Type undefined");
-                        if (date == null)
+                        }
+                        if (date == null) {
                             throw new Exception("Date undefined");
-                        
+                        }
+
                         // Everything is created.
                         currentPoi = poiType.constructPoi(latitude, longitude, date);
                     } else if (reader.getLocalName().equals("confirmations")) {
@@ -249,11 +250,11 @@ public class ServerPoiList extends PoiList {
                     }
                     break;
                 //case XMLStreamConstants.CHARACTERS:
-                    
+
                 //    break;
             }
         }
-        
+
         // Finished ;)
         return poiList;
     }

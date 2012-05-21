@@ -17,6 +17,8 @@
 package fr.umlv.ig.bipbip.server.gui;
 
 import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
+import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.server.data.PoiList;
 import java.util.Date;
@@ -32,6 +34,7 @@ public class PoiTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Date", "Type", "+", "-", "X", "Y"};
     private final Class[] columnClass = {Date.class, PoiType.class, Integer.class, Integer.class, Double.class, Double.class};
     private final PoiList poiList;
+    private final boolean displayAllPoints;
 
     public PoiList getPoiList() {
         return poiList;
@@ -41,9 +44,12 @@ public class PoiTableModel extends AbstractTableModel {
      * Creates a new table model.
      *
      * @param poiList List of Poi that this model will display.
+     * @param displayAllPoints Display all points including the removed ones.
      */
-    public PoiTableModel(PoiList poiList) {
+    public PoiTableModel(PoiList poiList, boolean displayAllPoints) {
         this.poiList = poiList;
+        this.displayAllPoints = displayAllPoints;
+        this.poiList.addPOIListener(new POIEventHandler()); // Listening the changes in the poilist.
     }
 
     @Override
@@ -63,12 +69,22 @@ public class PoiTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return poiList.getPoints().size();
+        if (displayAllPoints) {
+            return poiList.getAllPoints().size();
+        } else {
+            return poiList.getPoints().size();
+        }
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Poi poi = (Poi) poiList.getPoints().toArray()[rowIndex];
+        Poi poi;
+        if (displayAllPoints) {
+            poi = (Poi) poiList.getAllPoints().values().toArray()[rowIndex];
+        } else {
+            poi = (Poi) poiList.getPoints().toArray()[rowIndex];
+        }
+
         switch (columnIndex) {
             case 0:
                 return poi.getDate();
@@ -85,5 +101,24 @@ public class PoiTableModel extends AbstractTableModel {
             default:
                 throw new UnsupportedOperationException("Unknown column");
         }
+    }
+    
+    private class POIEventHandler implements PoiListener {
+
+        @Override
+        public void poiAdded(PoiEvent e) {
+            PoiTableModel.this.fireTableDataChanged();
+        }
+
+        @Override
+        public void poiUpdated(PoiEvent e) {
+            PoiTableModel.this.fireTableDataChanged();
+        }
+
+        @Override
+        public void poiRemoved(PoiEvent e) {
+            PoiTableModel.this.fireTableDataChanged();
+        }
+        
     }
 }
