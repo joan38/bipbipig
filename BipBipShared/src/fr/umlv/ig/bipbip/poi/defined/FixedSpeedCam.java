@@ -30,4 +30,8 @@ public class FixedSpeedCam extends AbstractReportedPoi {
     public FixedSpeedCam(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.FIXED_SPEED_CAM, date);
     }
+    
+    public FixedSpeedCam(double positionX, double positionY, Date date, int confirmations) {
+        super(positionX, positionY, PoiType.FIXED_SPEED_CAM, date, confirmations);
+    }
 }

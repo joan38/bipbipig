@@ -30,4 +30,8 @@ public class RoadWorks extends AbstractReportedPoi {
     public RoadWorks(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.ROADWORKS, date);
     }
+    
+    public RoadWorks(double positionX, double positionY, Date date, int confirmation) {
+        super(positionX, positionY, PoiType.ROADWORKS, date, confirmation);
+    }
 }

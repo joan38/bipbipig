@@ -22,12 +22,16 @@ import java.util.Date;
 
 /**
  * Represent a radar mobile.
- * 
+ *
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
 public class MobileSpeedCam extends AbstractReportedPoi {
 
     public MobileSpeedCam(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.MOBILE_SPEED_CAM, date);
+    }
+
+    public MobileSpeedCam(double positionX, double positionY, Date date, int confirmations) {
+        super(positionX, positionY, PoiType.MOBILE_SPEED_CAM, date, confirmations);
     }
 }

@@ -31,36 +31,61 @@ public enum PoiType {
     FIXED_SPEED_CAM("Fixed speed cam", "fixed_speed_cam.png") {
 
         @Override
-        public Poi constructPOI(double latitude, double longitude, Date date) {
+        public Poi constructPoi(double latitude, double longitude, Date date) {
             return new FixedSpeedCam(latitude, longitude, date);
+        }
+
+        @Override
+        public Poi constructPoi(double latitude, double longitude, Date date, int confirmations) {
+            return new FixedSpeedCam(latitude, longitude, date, confirmations);
         }
     },
     MOBILE_SPEED_CAM("Mobile", "mobile_speed_cam.png") {
 
         @Override
-        public Poi constructPOI(double latitude, double longitude, Date date) {
+        public Poi constructPoi(double latitude, double longitude, Date date) {
             return new MobileSpeedCam(latitude, longitude, date);
+        }
+
+        @Override
+        public Poi constructPoi(double latitude, double longitude, Date date, int confirmations) {
+            return new MobileSpeedCam(latitude, longitude, date, confirmations);
         }
     },
     ACCIDENT("Accident", "accident.png") {
 
         @Override
-        public Poi constructPOI(double latitude, double longitude, Date date) {
+        public Poi constructPoi(double latitude, double longitude, Date date) {
             return new Accident(latitude, longitude, date);
+        }
+
+        @Override
+        public Poi constructPoi(double latitude, double longitude, Date date, int confirmations) {
+            return new Accident(latitude, longitude, date, confirmations);
         }
     },
     ROADWORKS("Roadworks", "roadworks.png") {
 
         @Override
-        public Poi constructPOI(double latitude, double longitude, Date date) {
+        public Poi constructPoi(double latitude, double longitude, Date date) {
             return new RoadWorks(latitude, longitude, date);
+        }
+
+        @Override
+        public Poi constructPoi(double latitude, double longitude, Date date, int confirmations) {
+            return new RoadWorks(latitude, longitude, date, confirmations);
         }
     },
     MISCELLANEOUS("Miscellaneous", "miscellaneous.png") {
 
         @Override
-        public Poi constructPOI(double latitude, double longitude, Date date) {
+        public Poi constructPoi(double latitude, double longitude, Date date) {
             return new Miscellaneous(latitude, longitude, date);
+        }
+
+        @Override
+        public Poi constructPoi(double latitude, double longitude, Date date, int confirmations) {
+            return new Miscellaneous(latitude, longitude, date, confirmations);
         }
     };
     private final String title;
@@ -89,7 +114,18 @@ public enum PoiType {
      * @param date
      * @return A POI of the type EventType.
      */
-    public abstract Poi constructPOI(double latitude, double longitude, Date date);
+    public abstract Poi constructPoi(double latitude, double longitude, Date date);
+
+    /**
+     * Returns a new POI of the type EventType.
+     *
+     * @param latitude
+     * @param longitude
+     * @param date
+     * @param confirmations
+     * @return A POI of the type EventType.
+     */
+    public abstract Poi constructPoi(double latitude, double longitude, Date date, int confimations);
 
     @Override
     public String toString() {

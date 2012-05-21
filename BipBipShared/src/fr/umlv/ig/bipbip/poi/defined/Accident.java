@@ -30,4 +30,8 @@ public class Accident extends AbstractReportedPoi {
     public Accident(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.ACCIDENT, date);
     }
+    
+    public Accident(double positionX, double positionY, Date date, int confirmations) {
+        super(positionX, positionY, PoiType.ACCIDENT, date, confirmations);
+    }
 }

@@ -40,14 +40,27 @@ public abstract class AbstractReportedPoi implements Poi {
      * @param date Declaration date of the POI.
      */
     public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date) {
-        Objects.requireNonNull(date);
+        this(latitude, longitude, type, date, 0);
+    }
+    
+    /**
+     * Creates a reported point of interest. (POI)
+     *
+     * @param latitude Latitude of the POI.
+     * @param longitude Longitude of the POI.
+     * @param type Type of the POI.
+     * @param date Declaration date of the POI.
+     * @param confirmation Number of confirmations of the POI
+     */
+    public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date, int confirmations) {
         Objects.requireNonNull(type);
+        Objects.requireNonNull(date);
         
         this.latitude = latitude;
         this.longitude = longitude;
         this.type = type;
         this.date = date;
-        this.confirmations = 0;
+        this.confirmations = confirmations;
         this.refutations = 0;
     }
 

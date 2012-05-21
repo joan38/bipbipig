@@ -30,4 +30,8 @@ public class Miscellaneous extends AbstractReportedPoi {
     public Miscellaneous(double positionX, double positionY, Date date) {
         super(positionX, positionY, PoiType.MISCELLANEOUS, date);
     }
+    
+    public Miscellaneous(double positionX, double positionY, Date date, int confirmations) {
+        super(positionX, positionY, PoiType.MISCELLANEOUS, date, confirmations);
+    }
 }
