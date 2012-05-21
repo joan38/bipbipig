@@ -66,7 +66,7 @@ public class Server {
      * @return The server running state.
      */
     public boolean getConnected() {
-        return ssc.isOpen() && ssc.isRegistered();
+        return ssc.isOpen() && ssc.socket().isBound();
     }
 
     /**
