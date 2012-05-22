@@ -209,6 +209,6 @@ public abstract class AbstractReportedPoi implements Poi {
 
     @Override
     public String toString() {
-        return "POI, x: " + latitude + " y: " + longitude + " date: " + date + " type: " + type;
+        return "POI " + type + " coordinates:" + latitude + "," + longitude + " date:" + date;
     }
 }
