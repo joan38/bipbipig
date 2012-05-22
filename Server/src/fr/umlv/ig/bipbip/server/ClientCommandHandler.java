@@ -51,22 +51,22 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            PoiType event;
-            double x, y;
+            PoiType type;
+            double latitude, longitude;
             Date date;
             try {
-                event = PoiType.valueOf(scanner.next());
+                type = PoiType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
             if (!scanner.hasNextDouble()) {
                 throw new IOException("Missing X coordinate");
             }
-            x = scanner.nextDouble();
+            latitude = scanner.nextDouble();
             if (!scanner.hasNextDouble()) {
                 throw new IOException("Missing Y coordinate");
             }
-            y = scanner.nextDouble();
+            longitude = scanner.nextDouble();
             if (!scanner.hasNext()) {
                 throw new IOException("Missing time coordinate");
             }
@@ -85,16 +85,10 @@ public enum ClientCommandHandler {
                 throw new IOException("Invalid date: " + d);
             }
             int confirmations = scanner.nextInt();
-            /*
-             * Handling commands
-             */
-            // Creation of the POI.
-            Poi poi = event.constructPoi(x, y, date, confirmations);
 
-            // Adding the POI to the collection.
-            poiList.addPoi(poi);
+            logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
 
-            logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
+            poiList.addPoi(type.constructPoi(latitude, longitude, date, confirmations));
         }
     },
     NOT_SEEN {
@@ -114,22 +108,22 @@ public enum ClientCommandHandler {
             if (!scanner.hasNext()) {
                 throw new IOException("Invalid command");
             }
-            PoiType event;
-            double x, y;
+            PoiType type;
+            double latitude, longitude;
             Date date;
             try {
-                event = PoiType.valueOf(scanner.next());
+                type = PoiType.valueOf(scanner.next());
             } catch (IllegalArgumentException e) {
                 throw new IOException("Invalid event type");
             }
             if (!scanner.hasNextDouble()) {
-                throw new IOException("Missing X coordinate");
+                throw new IOException("Missing latitude coordinate");
             }
-            x = scanner.nextDouble();
+            latitude = scanner.nextDouble();
             if (!scanner.hasNextDouble()) {
-                throw new IOException("Missing Y coordinate");
+                throw new IOException("Missing longitude coordinate");
             }
-            y = scanner.nextDouble();
+            longitude = scanner.nextDouble();
             if (!scanner.hasNext()) {
                 throw new IOException("Missing time coordinate");
             }
@@ -147,24 +141,10 @@ public enum ClientCommandHandler {
                 e.printStackTrace();
                 throw new IOException("Invalid date: " + d);
             }
-            // Looking for the POI.
-            ArrayList<Poi> poiAt = poiList.getPoisAround(x, y, event);
 
-            // Looking for the POI dates.
-            Poi poi = null;
-            for (Poi p : poiAt) {
-                if (p.getDate().equals(date)) {
-                    poi = p;
-                    break;
-                }
-            }
+            logger.log(Level.INFO, "CLIENT: NOT_SEEN " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date));
 
-            // Woot, poi found.
-            if (poi != null) {
-                poiList.notSeen(poi);
-            }
-
-            logger.log((poi == null) ? Level.WARNING : Level.INFO, "CLIENT: NOT_SEEN " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date));
+            poiList.notSeen(type.constructPoi(latitude, longitude, date));
         }
     },
     GET_INFOS {
@@ -193,7 +173,7 @@ public enum ClientCommandHandler {
             logger.log(Level.INFO, "CLIENT: GET_INFOS " + latitude + " " + longitude);
 
             // Getting the points 40km square.
-            ArrayList<Poi> points = poiList.getPointsInAreaBetween(latitude, longitude, SQUARE_AREA);
+            ArrayList<Poi> points = poiList.getPoisInArea(latitude, longitude, SQUARE_AREA);
 
             // Sending the answer.
             ServerCommand.sendInfos(sc, points);

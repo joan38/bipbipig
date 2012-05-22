@@ -21,10 +21,8 @@ import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.server.data.PoiList;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedSet;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -69,12 +67,12 @@ public class PoiActiveTableModel extends AbstractTableModel implements PoiTableM
 
     @Override
     public int getRowCount() {
-        return poiList.getPoints().size();
+        return poiList.getPois().size();
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Poi poi = (Poi) poiList.getPoints().get(rowIndex);
+        Poi poi = (Poi) poiList.getPois().get(rowIndex);
 
         switch (columnIndex) {
             case 0:
@@ -96,7 +94,7 @@ public class PoiActiveTableModel extends AbstractTableModel implements PoiTableM
 
     @Override
     public List<Poi> getPoints() {
-        return poiList.getPoints();
+        return poiList.getPois();
     }
 
     private class PoiEventHandler implements PoiListener {

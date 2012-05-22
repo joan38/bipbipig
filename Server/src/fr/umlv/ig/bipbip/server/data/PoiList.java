@@ -30,15 +30,43 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class PoiList {
 
-    // Contains the currently active points.
+    /**
+     * Contains the currently active POIs.
+     */
     private final List<Poi> activePoints = Collections.synchronizedList(new ArrayList<Poi>());
-    // Contains all the points ever added or removed.
+    
+    /**
+     * Contains all the removed POIs.
+     */
     private final List<Poi> removedPoints = Collections.synchronizedList(new ArrayList<Poi>());
     private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
+    
     /**
      * Precision of the searches operations on the POI collection.
+     * 
+     * In meter
      */
     public static final double PRECISION = 500;
+    
+    /**
+     * Number of meter in one mile.
+     *
+     * 1 mile = 1852 m
+     */
+    private static final int NB_METER_OF_NAUTICAL_MILE = 1852;
+    
+    /**
+     * Get the distance from the first point to the second point in meter.
+     * 
+     * @param latitude1 latitude position of the first point.
+     * @param longitude1 longitude position of the first point.
+     * @param latitude2 latitude position of the second point.
+     * @param longitude2 longitude position of the second point.
+     * @return The distance in meter
+     */
+    public static double getDistanceInMeter(double latitude1, double longitude1, double latitude2, double longitude2) {
+        return NB_METER_OF_NAUTICAL_MILE * 60 * Math.acos(Math.sin(latitude1) * Math.sin(latitude2) + Math.cos(latitude1) * Math.cos(latitude2) * Math.cos(longitude2 - longitude1));
+    }
 
     /**
      * Create an empty list of POI.
@@ -128,93 +156,88 @@ public class PoiList {
 
         firePoiRemoved(new PoiEvent(this, p));
     }
-
+    
     /**
-     * Returns all POI contained between the two designed points.
+     * Looks up POIs around the position with the specified POI type.
      *
-     * @param latitude1 X position of the first point.
-     * @param longitude1 Y position of the first point.
-     * @param latitude2 X position of the second point.
-     * @param longitude2 Y position of the second point.
+     * Get all POIs in the area which have the specified POI type.
      *
-     * @return A list of all POI contained between those two points.
+     * @param latitude1 latitude position of the point.
+     * @param longitude1 longitude position of the point.
+     * @param radiusArea radius of the area.
+     * @param type Type of the POI. Can be null to avoid the filter on this attribut.
+     * @param date Date of the POI. Can be null to avoid the filter on this attribut.
+     *
+     * @return A list of all POI contained in the area.
      */
-    public ArrayList<Poi> getPointsInAreaBetween(double latitude, double longitude, double distanceArea) {
+    public ArrayList<Poi> getPoisInArea(double latitude, double longitude, double radiusArea, PoiType type, Date date) {
         ArrayList<Poi> result = new ArrayList<Poi>();
         for (Poi poi : activePoints) {
             double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
-            if (calcDistance < distanceArea) {
+            if (calcDistance <= radiusArea && (type == null || poi.getType().equals(type)) && (date == null || poi.getDate().equals(date))) {
                 result.add(poi);
             }
         }
-
         return result;
     }
-    
-    public static double getDistanceInMeter(double latitude1, double longitude1, double latitude2, double longitude2) {
-        return NB_METER_OF_NAUTICAL_MILE * 60 * Math.acos(Math.sin(latitude1) * Math.sin(latitude2) + Math.cos(latitude1) * Math.cos(latitude2) * Math.cos(longitude2 - longitude1));
+
+    /**
+     * Looks up POIs around the position with the specified POI type.
+     *
+     * Get all POIs in the area which have the specified POI type.
+     *
+     * @param latitude1 latitude position of the point.
+     * @param longitude1 longitude position of the point.
+     * @param radiusArea radius of the area.
+     * @param type Type of the POI. Can be null to avoid the filter on this attribut.
+     *
+     * @return A list of all POI contained in the area.
+     */
+    public ArrayList<Poi> getPoisInArea(double latitude, double longitude, double radiusArea, PoiType type) {
+        return getPoisInArea(latitude, longitude, radiusArea, type, null);
     }
     
     /**
-     * Number of meter in one mile.
+     * Looks up POIs around the position.
      *
-     * 1 mile = 1852 m
+     * Get all POIs in the area.
+     * If you put 0 in radiusArea you might still get several POI at the same coordinates
+     * 
+     * @param latitude latitude position of the point.
+     * @param longitude longitude position of the point.
+     * @param radiusArea radius of the area.
+     *
+     * @return A list of POI contained in the area.
      */
-    private static final int NB_METER_OF_NAUTICAL_MILE = 1852;
-
-    /**
-     * Looks up POIs at the position x/y.
-     *
-     * As x and y are double, the exacts position cannot be given, so the
-     * nearest POI will be returned instead.
-     *
-     * @param latitude X position of the point.
-     * @param longitude Y position of the point.
-     * @param type Type of the POI.
-     *
-     * @return A list of POI found at this position.
-     */
-    public ArrayList<Poi> getPoisAround(Double latitude, Double longitude, PoiType type) {
-        ArrayList<Poi> result = new ArrayList<Poi>();
-        for (Poi poi : activePoints) {
-            if (!poi.getType().equals(type)) {
-                continue;
-            }
-
-            double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
-            if (calcDistance < PRECISION) {
-                result.add(poi);
-            }
-        }
-
-        return result;
+    public ArrayList<Poi> getPoisInArea(double latitude, double longitude, double radiusArea) {
+        return getPoisInArea(latitude, longitude, radiusArea, null);
     }
 
     /**
      * Gets the points.
      */
-    public List<Poi> getPoints() {
+    public List<Poi> getPois() {
         return activePoints;
     }
 
     /**
      * Gets the removed points.
      */
-    public List<Poi> getRemovedPoints() {
+    public List<Poi> getRemovedPois() {
         return removedPoints;
     }
 
     /**
      * Gets all points at a date.
-     * 
+     *
      * @param date Date to display all points.
      * @param outMinDate The minimum date value.
-     * 
+     *
      * Be aware that this method have a complexity of "n".
-     * 
+     *
      * @return A set that contains all points, including the removed one.
      */
-    public ArrayList<Poi> getAllPoints(Date date, Date outMinDate) {
+    public ArrayList<Poi> getAllPois(Date date, Date outMinDate) {
         ArrayList<Poi> result = new ArrayList<Poi>();
 
         for (Poi poi : activePoints) {

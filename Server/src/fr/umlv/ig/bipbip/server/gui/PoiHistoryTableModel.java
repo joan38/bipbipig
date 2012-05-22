@@ -85,7 +85,7 @@ public class PoiHistoryTableModel extends AbstractTableModel implements PoiTable
     public void setCurrentFilterDate(Date currentFilterDate) {
         this.currentFilterDate = currentFilterDate;
         firstPoiDate = new Date();
-        poiData = poiList.getAllPoints(currentFilterDate, firstPoiDate);
+        poiData = poiList.getAllPois(currentFilterDate, firstPoiDate);
         
         this.fireTableDataChanged();
     }

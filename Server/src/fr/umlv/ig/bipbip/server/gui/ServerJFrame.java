@@ -50,6 +50,9 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class ServerJFrame extends JFrame {
 
+    private static final int FRAME_WIDTH = 770;
+    private static final int FRAME_HEIGHT = 430;
+    
     // Connected objects
     private final Server server;
     private final ArrayList<Logger> loggersToDisplay;
@@ -115,7 +118,8 @@ public class ServerJFrame extends JFrame {
         Objects.requireNonNull(loggersToDisplay);
         Objects.requireNonNull(serverPoiList);
 
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
 
         this.loggersToDisplay = loggersToDisplay;
 
@@ -139,7 +143,7 @@ public class ServerJFrame extends JFrame {
 
         // Menu.
         menuBar = new JMenuBar();
-        this.setJMenuBar(menuBar);
+        setJMenuBar(menuBar);
 
         // Menu file.
         menuFile = new JMenu("File");
@@ -185,7 +189,7 @@ public class ServerJFrame extends JFrame {
 
         // Horizontal Split pane.
         horizontalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        this.add(horizontalSplitPane);
+        add(horizontalSplitPane);
 
         // Log
         clientCommandLog = new JList(clientCommandLogList);
@@ -203,7 +207,7 @@ public class ServerJFrame extends JFrame {
         map = new JMapViewer();
 
         // Filling the map with the already defined POI.
-        for (Poi poi : serverPoiList.getPoints()) {
+        for (Poi poi : serverPoiList.getPois()) {
             // Storing the JPOI
             JPoi jpoi = new JPoi(poi);
             poiToJPoi.put(poi, jpoi);
@@ -338,7 +342,7 @@ public class ServerJFrame extends JFrame {
         });
 
         // Exit?
-        this.addWindowListener(new WindowAdapter() {
+        addWindowListener(new WindowAdapter() {
 
             @Override
             public void windowClosing(WindowEvent e) {
@@ -449,7 +453,7 @@ public class ServerJFrame extends JFrame {
             serverPoiList.addPoiListener(new PoiEventHandler());
 
             // Filling the map with the new defined POI.
-            for (Poi poi : serverPoiList.getPoints()) {
+            for (Poi poi : serverPoiList.getPois()) {
                 // Storing the JPOI
                 JPoi jpoi = new JPoi(poi);
                 poiToJPoi.put(poi, jpoi);
@@ -561,7 +565,7 @@ public class ServerJFrame extends JFrame {
         }
         index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
 
-        Poi poi = (Poi) serverPoiList.getPoints().toArray()[index];
+        Poi poi = (Poi) serverPoiList.getPois().toArray()[index];
 
         PoiEditJFrame frame = new PoiEditJFrame(this, serverPoiList, poi);
         frame.setVisible(true);
@@ -584,7 +588,7 @@ public class ServerJFrame extends JFrame {
         Poi[] poiToDeletes = new Poi[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int index = poiTable.convertRowIndexToModel(selectedRows[i]);
-            poiToDeletes[i] = (Poi) serverPoiList.getPoints().toArray()[index];
+            poiToDeletes[i] = (Poi) serverPoiList.getPois().toArray()[index];
         }
 
         for (Poi poi : poiToDeletes) {

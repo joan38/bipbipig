@@ -40,6 +40,8 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class PoiHistoryJFrame extends JFrame {
 
+    private static final int FRAME_WIDTH = 770;
+    private static final int FRAME_HEIGHT = 430;
     private JPanel topPanel = new JPanel(new GridBagLayout());
     private JFormattedTextField dateField = new JFormattedTextField(new DateFormatter(DateFormat.getDateTimeInstance()));
     private JSlider sliderDate = new JSlider(1, 100);
@@ -122,7 +124,7 @@ public class PoiHistoryJFrame extends JFrame {
 
         refresh(true);
 
-        this.setSize(700, 480);
+        this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
     }
 
     private void refresh(boolean updateSlider) {

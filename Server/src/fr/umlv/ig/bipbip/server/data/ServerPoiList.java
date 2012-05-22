@@ -39,10 +39,9 @@ import javax.xml.stream.*;
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
 public class ServerPoiList extends PoiList {
-    
+
     // Debug logger.
     private static final Logger logger = Logger.getLogger(PoiList.class.getName());
-    
     /**
      * After X refutations, delete the POI.
      */
@@ -51,42 +50,29 @@ public class ServerPoiList extends PoiList {
     /**
      * Increment the number of refutation of a POI.
      *
-     * If the number of refutations > NB_REFUTATION_FOR_DELETE, then the POI is
+     * If the number of refutations >= NB_REFUTATION_FOR_DELETE, then the POI is
      * removed.
      *
-     * @param p Point of interest.
+     * @param poi The not seen POI.
      *
      * @see #NB_REFUTATION_FOR_DELETE
      */
-    public void notSeen(Poi p) {
-        ArrayList<Poi> list = getPoisAround(p.getLat(), p.getLon(), p.getType());
-        if (list.isEmpty()) { // POI not found.
-            logger.log(Level.INFO, "Not seen: Request of a POI not found. x: {0} y: {1}", new Object[]{p.getLat(), p.getLon()});
-            return;
-        }
-
-        Poi poiToUse = null;
-
-        for (Poi poi : list) {
-            if (poi.getDate().equals(p.getDate())) {
-                // POI found.
-                poiToUse = poi;
-                break;
-            }
-        }
-
-        if (poiToUse == null) {
-            logger.log(Level.INFO, "Not seen: Request of a POI not found (POI found but invalid date). {0}", p);
+    public void notSeen(Poi poi) {
+        ArrayList<Poi> pois = getPoisInArea(poi.getLat(), poi.getLon(), PRECISION, poi.getType(), poi.getDate());
+        if (pois.isEmpty()) { // POI not found.
+            logger.log(Level.WARNING, "Not seen: Requested POI not found. latitude:{0} longitude:{1} type:{2}", new Object[]{poi.getLat(), poi.getLon(), poi.getType()});
             return;
         }
 
         // POI get, marking it as notSeen.
-        int refutations = poiToUse.getRefutations() + 1;
-        if (refutations >= NB_REFUTATION_FOR_DELETE) {
-            removePoi(poiToUse);
-        } else {
-            poiToUse.setNbNotSeen(refutations);
-            firePoiUpdated(new PoiEvent(this, poiToUse));
+        for (Poi p : pois) {
+            int newRefutations = p.getRefutations() + 1;
+            if (newRefutations >= NB_REFUTATION_FOR_DELETE) {
+                removePoi(p);
+            } else {
+                p.setNbNotSeen(newRefutations);
+                firePoiUpdated(new PoiEvent(this, p));
+            }
         }
     }
     
@@ -100,30 +86,25 @@ public class ServerPoiList extends PoiList {
      *
      * If the POI already exists, then the number of confirmations is increased.
      *
-     * @param p POI to add.
+     * @param poi POI to add.
      *
      * @see #addPrecision
      */
     @Override
-    public void addPoi(Poi p) {
-        ArrayList<Poi> poisAround = getPoisAround(p.getLat(), p.getLon(), p.getType());
-
-        if (poisAround.isEmpty()) { 
-            super.addPoi(p);
+    public void addPoi(Poi poi) {
+        ArrayList<Poi> poisAround = getPoisInArea(poi.getLat(), poi.getLon(), PRECISION, poi.getType());
+        if (poisAround.isEmpty()) {
+            super.addPoi(poi);
+            logger.log(Level.FINE, "Added " + poi);
             return;
         }
 
-        // POI founds, checking for the type and incrementing the number of confirmations.
-        for (Poi poi : poisAround) {
-                logger.log(Level.FINE, "Confirmation of "+ poi);
-                poi.setConfirmations(poi.getConfirmations() + 1);
-                firePoiUpdated(new PoiEvent(this, poi));
-                return;
+        // POI founds, incrementing the number of confirmations.
+        for (Poi p : poisAround) {
+            logger.log(Level.FINE, "Confirmed " + poi);
+            p.setConfirmations(p.getConfirmations() + 1);
+            firePoiUpdated(new PoiEvent(this, poi));
         }
-
-        // POI of the type not found, adding a new one so.
-        logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so "+ p);
-        super.addPoi(p);
     }
 
     /**
@@ -144,8 +125,8 @@ public class ServerPoiList extends PoiList {
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
 
         // Writing the POIs.
-        writePoi(writer, dateFormat, this.getPoints());
-        writePoi(writer, dateFormat, this.getRemovedPoints());
+        writePoi(writer, dateFormat, this.getPois());
+        writePoi(writer, dateFormat, this.getRemovedPois());
 
         writer.writeEndElement();
 
@@ -246,9 +227,9 @@ public class ServerPoiList extends PoiList {
                 case XMLStreamConstants.END_ELEMENT:
                     if (reader.getLocalName().equals("poi") && currentPoi != null) {
                         if (currentPoi.getRemovedDate() == null) {
-                            poiList.getPoints().add(currentPoi);
+                            poiList.getPois().add(currentPoi);
                         } else {
-                            poiList.getRemovedPoints().add(currentPoi);
+                            poiList.getRemovedPois().add(currentPoi);
                         }
                         currentPoi = null;
                     }

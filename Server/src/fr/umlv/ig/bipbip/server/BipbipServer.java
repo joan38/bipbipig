@@ -94,7 +94,6 @@ public class BipbipServer {
 
         // Launching the server GUI.
         ServerJFrame frame = new ServerJFrame(server, loggersToDisplayInGui, server.getPoiList());
-        frame.setSize(800, 500);
         frame.setVisible(true);
 
         // Launching the server.
