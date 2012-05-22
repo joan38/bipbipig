@@ -78,24 +78,25 @@ public class ServerCommunication implements Runnable {
             synchronized (ssc) {
                 try {
                     sc = ssc.accept();
-                    logger.log(Level.INFO, "Accept "+ sc.getRemoteAddress().toString());
+                    logger.log(Level.INFO, "Accept " + sc.getRemoteAddress().toString());
                 } catch (ClosedChannelException e) {
                     return; // Terminating the thread. Server is closed.
                 } catch (IOException e) {
-                    logger.log(Level.WARNING, "Accept "+ e.getLocalizedMessage());
+                    logger.log(Level.WARNING, "Accept " + e.getLocalizedMessage());
                     continue;
                 }
-
+            }
+            
+            try {
+                serveClient(sc);
+            } finally {
                 try {
-                    serveClient(sc);
-                } finally {
-                    try {
-                        sc.close();
-                    } catch (IOException ignored) {
-                        continue;
-                    }
+                    sc.close();
+                } catch (IOException ignored) {
+                    continue;
                 }
             }
+
 
         }
     }
@@ -110,7 +111,7 @@ public class ServerCommunication implements Runnable {
         scanner = new Scanner(sc);
         try {
             while (requestShutdown.get() == false && scanner.hasNextLine()) {
-                logger.log(Level.FINE, "Lecture depuis le réseau. "+ sc.getRemoteAddress().toString());
+                logger.log(Level.FINE, "Lecture depuis le réseau. " + sc.getRemoteAddress().toString());
                 String line = scanner.nextLine();
                 Scanner tmp_scanner = new Scanner(line);
                 if (!tmp_scanner.hasNext()) {
