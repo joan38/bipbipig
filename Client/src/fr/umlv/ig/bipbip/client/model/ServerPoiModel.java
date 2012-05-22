@@ -136,7 +136,6 @@ public class ServerPoiModel implements PoiModel {
 
         try {
             server.submit(poi);
-            update(new Coordinate(poi.getLat(), poi.getLon()));
         } catch (IOException e) {
             throw new IOException("Connection problem: Unable to submit the POI", e);
         }

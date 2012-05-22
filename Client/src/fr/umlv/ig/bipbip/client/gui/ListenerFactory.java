@@ -63,12 +63,12 @@ public final class ListenerFactory {
                     for (MapMarker mapMarker : mapMarkers) {
                         JPoi jpoi = (JPoi) mapMarker;
                         if (jpoi.getIconArea().contains(mousePosition)) {
-                            PopupFactory.getPoiPopupMenu(jpoi.getPoi(), model, infos).show(map, mousePosition.x, mousePosition.y);
+                            PopupFactory.getPoiPopupMenu(jpoi.getPoi(), model, map, infos).show(map, mousePosition.x, mousePosition.y);
                             return;
                         }
                     }
 
-                    PopupFactory.getMapPopupMenu(map.getPosition(mousePosition), model, infos).show(map, mousePosition.x, mousePosition.y);
+                    PopupFactory.getMapPopupMenu(map.getPosition(mousePosition), model, map, infos).show(map, mousePosition.x, mousePosition.y);
                 }
             }
         };
@@ -93,7 +93,7 @@ public final class ListenerFactory {
         };
     }
 
-    public static ActionListener getConfirmationButtonListener(final Poi poi, final ServerPoiModel model, final JLabel infos) {
+    public static ActionListener getConfirmationButtonListener(final Poi poi, final ServerPoiModel model, final JMapViewer map, final JLabel infos) {
         Objects.requireNonNull(poi);
         Objects.requireNonNull(model);
         Objects.requireNonNull(infos);
@@ -104,6 +104,7 @@ public final class ListenerFactory {
             public void actionPerformed(ActionEvent event) {
                 try {
                     model.submit(poi);
+                    model.update(map.getPosition());
                     infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI confirmed, thank you for your contribution",
@@ -141,10 +142,11 @@ public final class ListenerFactory {
         };
     }
 
-    public static ActionListener getSubmitButtonListener(final Coordinate coordinate, final PoiType type, final ServerPoiModel model, final JLabel infos) {
+    public static ActionListener getSubmitButtonListener(final Coordinate coordinate, final PoiType type, final ServerPoiModel model, final JMapViewer map, final JLabel infos) {
         Objects.requireNonNull(coordinate);
         Objects.requireNonNull(type);
         Objects.requireNonNull(model);
+        Objects.requireNonNull(map);
         Objects.requireNonNull(infos);
         
         return new ActionListener() {
@@ -153,6 +155,7 @@ public final class ListenerFactory {
             public void actionPerformed(ActionEvent event) {
                 try {
                     model.submit(type.constructPoi(coordinate.getLat(), coordinate.getLon(), new Date()));
+                    model.update(map.getPosition());
                     infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI submitted, thank you for your contribution",
