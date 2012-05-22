@@ -96,6 +96,13 @@ public class PoiHistoryTableModel extends AbstractTableModel implements PoiTable
     public Date getCurrentFilterDate() {
         return currentFilterDate;
     }
+
+    /**
+     * Gets the date of the first element.
+     */
+    public Date getFirstPoiDate() {
+        return firstPoiDate;
+    }
     
     
     @Override

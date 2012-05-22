@@ -36,6 +36,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.RowSorter;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.DateFormatter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -49,6 +51,7 @@ public class PoiHistoryJFrame extends JFrame {
     private final PoiList poiList;
     private JPanel topPanel = new JPanel(new GridBagLayout());
     private JFormattedTextField dateField = new JFormattedTextField(new DateFormatter(DateFormat.getDateTimeInstance()));
+    private JSlider sliderDate = new JSlider();
     private JButton nowButton = new JButton("Now");
     private JButton refreshButton = new JButton("Refresh");
     private JSplitPane splitPane = new JSplitPane();
@@ -76,10 +79,15 @@ public class PoiHistoryJFrame extends JFrame {
 
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        topPanel.add(sliderDate, gbc);
+        
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
         topPanel.add(nowButton, gbc);
 
         gbc = new GridBagConstraints();
-        gbc.gridx = 2;
+        gbc.gridx = 3;
         topPanel.add(refreshButton, gbc);
 
         this.add(splitPane, BorderLayout.CENTER);
@@ -113,6 +121,14 @@ public class PoiHistoryJFrame extends JFrame {
             }
         });
         
+        sliderDate.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                dateField.setValue(new Date(sliderDate.getValue() * 10));
+            }
+        });
+        
         refresh();
 
         this.setSize(640, 480);
@@ -127,5 +143,10 @@ public class PoiHistoryJFrame extends JFrame {
         for (Poi poi : model.getPoints()) {
             map.addMapMarker(new JPoi(poi));
         }
+        
+        // Updating the scrollbar.
+        sliderDate.setMinimum(convertDateToInt(model.getFirstPoiDate()));
+        sliderDate.setMaximum(convertDateToInt(new Date()));
+        sliderDate.setValue(convertDateToInt((Date)dateField.getValue()));
     }
 }
