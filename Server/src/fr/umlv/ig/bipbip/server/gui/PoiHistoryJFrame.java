@@ -26,16 +26,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Objects;
-import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.RowSorter;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.TableRowSorter;
@@ -48,7 +40,6 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class PoiHistoryJFrame extends JFrame {
 
-    private final PoiList poiList;
     private JPanel topPanel = new JPanel(new GridBagLayout());
     private JFormattedTextField dateField = new JFormattedTextField(new DateFormatter(DateFormat.getDateTimeInstance()));
     private JSlider sliderDate = new JSlider();
@@ -65,10 +56,7 @@ public class PoiHistoryJFrame extends JFrame {
 
     public PoiHistoryJFrame(PoiList poiList) {
         super("Points history navigator");
-        
         Objects.requireNonNull(poiList);
-
-        this.poiList = poiList;
 
         // Creation of the frame.
         this.add(topPanel, BorderLayout.PAGE_START);

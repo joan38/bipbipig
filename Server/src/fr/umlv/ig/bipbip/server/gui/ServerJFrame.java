@@ -428,16 +428,16 @@ public class ServerJFrame extends JFrame {
                 // Opening the file.
                 serverPOIList = ServerPoiList.readFromFile(inputStream);
                 poiTable.setModel(new PoiActiveTableModel(serverPOIList));
-            } catch (XMLStreamException ex) {
-                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
+            } catch (XMLStreamException e) {
+                JOptionPane.showMessageDialog(this, e.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
                 return;
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
                 return;
             } finally {
                 try {
                     inputStream.close();
-                } catch (IOException ex) {
+                } catch (IOException e) {
                 }
             }
 
