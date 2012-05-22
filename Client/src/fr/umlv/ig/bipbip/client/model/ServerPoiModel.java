@@ -41,24 +41,6 @@ public class ServerPoiModel implements PoiModel {
         this.server = server;
     }
 
-    public void update(Coordinate coordinate) throws IOException {
-        try {
-            ArrayList<Poi> newPOIs = (ArrayList<Poi>) server.getPois(coordinate);
-            for (Poi poi : pois) {
-                if (!newPOIs.contains(poi)) {
-                    remove(poi);
-                }
-            }
-            for (Poi poi : newPOIs) {
-                if (!pois.contains(poi)) {
-                    add(poi);
-                }
-            }
-        } catch (IOException e) {
-            throw new IOException("Connection problem: Unable to update POIs", e);
-        }
-    }
-
     @Override
     public Collection<Poi> getAll() {
         return pois;
@@ -129,6 +111,24 @@ public class ServerPoiModel implements PoiModel {
 
         pois.remove(poi);
         firePoiRemoved(new PoiEvent(this, poi));
+    }
+    
+    public void update(Coordinate coordinate) throws IOException {
+        try {
+            ArrayList<Poi> newPois = (ArrayList<Poi>) server.getPois(coordinate);
+            for (Poi poi : pois) {
+                if (!newPois.contains(poi)) {
+                    remove(poi);
+                }
+            }
+            for (Poi poi : newPois) {
+                if (!pois.contains(poi)) {
+                    add(poi);
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException("Connection problem: Unable to update POIs", e);
+        }
     }
 
     public void submit(Poi poi) throws IOException {

@@ -106,7 +106,7 @@ public final class ListenerFactory {
                     model.submit(poi);
                     model.update(map.getPosition());
                     infos.setText(" ");
-                    JOptionPane.showMessageDialog(null,
+                    JOptionPane.showMessageDialog(map,
                             "POI confirmed, thank you for your contribution",
                             "POI confirmed",
                             JOptionPane.INFORMATION_MESSAGE,
@@ -132,7 +132,7 @@ public final class ListenerFactory {
                     model.notSeen(poi);
                     model.update(map.getPosition());
                     infos.setText(" ");
-                    JOptionPane.showMessageDialog(null,
+                    JOptionPane.showMessageDialog(map,
                             "POI declared as not seen, thank you for your contribution",
                             "POI not seen",
                             JOptionPane.INFORMATION_MESSAGE,
@@ -159,7 +159,7 @@ public final class ListenerFactory {
                     model.submit(type.constructPoi(coordinate.getLat(), coordinate.getLon(), new Date()));
                     model.update(map.getPosition());
                     infos.setText(" ");
-                    JOptionPane.showMessageDialog(null,
+                    JOptionPane.showMessageDialog(map,
                             "POI submitted, thank you for your contribution",
                             "POI submitted",
                             JOptionPane.INFORMATION_MESSAGE,
