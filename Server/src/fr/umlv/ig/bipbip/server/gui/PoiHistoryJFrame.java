@@ -42,17 +42,13 @@ public class PoiHistoryJFrame extends JFrame {
 
     private JPanel topPanel = new JPanel(new GridBagLayout());
     private JFormattedTextField dateField = new JFormattedTextField(new DateFormatter(DateFormat.getDateTimeInstance()));
-    private JSlider sliderDate = new JSlider();
+    private JSlider sliderDate = new JSlider(1, 100);
     private JButton nowButton = new JButton("Now");
     private JButton refreshButton = new JButton("Refresh");
     private JSplitPane splitPane = new JSplitPane();
     private JMapViewer map = new JMapViewer();
     private JPoiTable poiTable;
     private PoiHistoryTableModel model;
-
-    private int convertDateToInt(Date date) {
-        return (int) (date.getTime() / 10);
-    }
 
     public PoiHistoryJFrame(PoiList poiList) {
         super("Points history navigator");
@@ -69,7 +65,7 @@ public class PoiHistoryJFrame extends JFrame {
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         topPanel.add(sliderDate, gbc);
-        
+
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         topPanel.add(nowButton, gbc);
@@ -97,44 +93,56 @@ public class PoiHistoryJFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dateField.setValue(new Date());
-                refresh();
+                refresh(true);
             }
         });
-        
+
         refreshButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                refresh();
+                refresh(true);
             }
         });
-        
+
         sliderDate.addChangeListener(new ChangeListener() {
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                dateField.setValue(new Date(sliderDate.getValue() * 10));
+                long maxValue = (new Date()).getTime();
+                long minValue = model.getFirstPoiDate().getTime();
+
+                double newDate = minValue + ((maxValue - minValue) * (sliderDate.getValue() / 100.0));
+
+                dateField.setValue(new Date((long) newDate));
+
+                refresh(false);
             }
         });
-        
-        refresh();
 
-        this.setSize(640, 480);
+        refresh(true);
+
+        this.setSize(700, 480);
     }
 
-    private void refresh() {
-        model.setCurrentFilterDate((Date)dateField.getValue());
-        
+    private void refresh(boolean updateSlider) {
+        model.setCurrentFilterDate((Date) dateField.getValue());
+
         // Adding markers.
         map.getMapMarkerList().clear();
         map.repaint();
         for (Poi poi : model.getPoints()) {
             map.addMapMarker(new JPoi(poi));
         }
-        
-        // Updating the scrollbar.
-        sliderDate.setMinimum(convertDateToInt(model.getFirstPoiDate()));
-        sliderDate.setMaximum(convertDateToInt(new Date()));
-        sliderDate.setValue(convertDateToInt((Date)dateField.getValue()));
+
+        if (updateSlider) {
+            long minDate = model.getFirstPoiDate().getTime();
+            long currentDate = ((Date) dateField.getValue()).getTime();
+            long maxDate = (new Date()).getTime();
+
+            double newPosition = ((currentDate - minDate) * 100) / (maxDate - minDate);
+
+            sliderDate.setValue((int) newPosition);
+        }
     }
 }
