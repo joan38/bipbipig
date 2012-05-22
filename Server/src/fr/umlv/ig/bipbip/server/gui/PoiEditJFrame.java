@@ -37,14 +37,15 @@ import javax.swing.*;
 public class PoiEditJFrame extends JDialog {
 
     private final ServerPoiList poiList;
-    private Poi editedPOI = null;
-    //
+    private Poi editedPoi = null;
+    
     // GUI.
     //
     // Header
     private JPanel headerPanel;
     private JLabel titleLabel;
     private JLabel typeIcon;
+    
     // Configuration components
     private JPanel componentPanel;
     private JLabel dateLabel;
@@ -308,7 +309,7 @@ public class PoiEditJFrame extends JDialog {
         Objects.requireNonNull(poiToEdit);
 
         this.poiList = poiList;
-        this.editedPOI = poiToEdit;
+        this.editedPoi = poiToEdit;
 
         // Creation of the frame.
         this.setSize(500, 300);
@@ -340,7 +341,7 @@ public class PoiEditJFrame extends JDialog {
      */
     private void createNewPoi() {
         // Adding a new POI to the collection.
-        poiList.addPOI(createPoiFromData());
+        poiList.addPoi(createPoiFromData());
 
         // Over.
         this.setVisible(false);
@@ -351,7 +352,7 @@ public class PoiEditJFrame extends JDialog {
      */
     private void editPoi() {
         // Adding a new POI to the collection.
-        poiList.updatePoi(editedPOI, createPoiFromData());
+        poiList.updatePoi(editedPoi, createPoiFromData());
 
         // Over.
         this.setVisible(false);
