@@ -34,30 +34,27 @@ public class PoiList {
      * Contains the currently active POIs.
      */
     private final List<Poi> activePoints = Collections.synchronizedList(new ArrayList<Poi>());
-    
     /**
      * Contains all the removed POIs.
      */
     private final List<Poi> removedPoints = Collections.synchronizedList(new ArrayList<Poi>());
     private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
-    
     /**
      * Precision of the searches operations on the POI collection.
-     * 
+     *
      * In meter
      */
     public static final double PRECISION = 500;
-    
     /**
      * Number of meter in one mile.
      *
      * 1 mile = 1852 m
      */
     private static final int NB_METER_OF_NAUTICAL_MILE = 1852;
-    
+
     /**
      * Get the distance from the first point to the second point in meter.
-     * 
+     *
      * @param latitude1 latitude position of the first point.
      * @param longitude1 longitude position of the first point.
      * @param latitude2 latitude position of the second point.
@@ -156,7 +153,7 @@ public class PoiList {
 
         firePoiRemoved(new PoiEvent(this, p));
     }
-    
+
     /**
      * Looks up POIs around the position with the specified POI type.
      *
@@ -165,17 +162,21 @@ public class PoiList {
      * @param latitude1 latitude position of the point.
      * @param longitude1 longitude position of the point.
      * @param radiusArea radius of the area.
-     * @param type Type of the POI. Can be null to avoid the filter on this attribut.
-     * @param date Date of the POI. Can be null to avoid the filter on this attribut.
+     * @param type Type of the POI. Can be null to avoid the filter on this
+     * attribut.
+     * @param date Date of the POI. Can be null to avoid the filter on this
+     * attribut.
      *
      * @return A list of all POI contained in the area.
      */
     public ArrayList<Poi> getPoisInArea(double latitude, double longitude, double radiusArea, PoiType type, Date date) {
         ArrayList<Poi> result = new ArrayList<Poi>();
-        for (Poi poi : activePoints) {
-            double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
-            if (calcDistance <= radiusArea && (type == null || poi.getType().equals(type)) && (date == null || poi.getDate().equals(date))) {
-                result.add(poi);
+        synchronized (activePoints) {
+            for (Poi poi : activePoints) {
+                double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
+                if (calcDistance <= radiusArea && (type == null || poi.getType().equals(type)) && (date == null || poi.getDate().equals(date))) {
+                    result.add(poi);
+                }
             }
         }
         return result;
@@ -189,20 +190,21 @@ public class PoiList {
      * @param latitude1 latitude position of the point.
      * @param longitude1 longitude position of the point.
      * @param radiusArea radius of the area.
-     * @param type Type of the POI. Can be null to avoid the filter on this attribut.
+     * @param type Type of the POI. Can be null to avoid the filter on this
+     * attribut.
      *
      * @return A list of all POI contained in the area.
      */
     public ArrayList<Poi> getPoisInArea(double latitude, double longitude, double radiusArea, PoiType type) {
         return getPoisInArea(latitude, longitude, radiusArea, type, null);
     }
-    
+
     /**
      * Looks up POIs around the position.
      *
-     * Get all POIs in the area.
-     * If you put 0 in radiusArea you might still get several POI at the same coordinates
-     * 
+     * Get all POIs in the area. If you put 0 in radiusArea you might still get
+     * several POI at the same coordinates
+     *
      * @param latitude latitude position of the point.
      * @param longitude longitude position of the point.
      * @param radiusArea radius of the area.
@@ -240,19 +242,24 @@ public class PoiList {
     public ArrayList<Poi> getAllPois(Date date, Date outMinDate) {
         ArrayList<Poi> result = new ArrayList<Poi>();
 
-        for (Poi poi : activePoints) {
-            if (poi.getDate().compareTo(date) <= 0) {
-                result.add(poi);
-                if (poi.getDate().compareTo(outMinDate) < 0) {
-                    outMinDate.setTime(poi.getDate().getTime());
+        synchronized (activePoints) {
+            for (Poi poi : activePoints) {
+                if (poi.getDate().compareTo(date) <= 0) {
+                    result.add(poi);
+                    if (poi.getDate().compareTo(outMinDate) < 0) {
+                        outMinDate.setTime(poi.getDate().getTime());
+                    }
                 }
             }
         }
-        for (Poi poi : removedPoints) {
-            if (poi.getDate().compareTo(date) <= 0 && poi.getRemovedDate().compareTo(date) >= 0) {
-                result.add(poi);
-                if (poi.getDate().compareTo(outMinDate) < 0) {
-                    outMinDate.setTime(poi.getDate().getTime());
+        
+        synchronized (removedPoints) {
+            for (Poi poi : removedPoints) {
+                if (poi.getDate().compareTo(date) <= 0 && poi.getRemovedDate().compareTo(date) >= 0) {
+                    result.add(poi);
+                    if (poi.getDate().compareTo(outMinDate) < 0) {
+                        outMinDate.setTime(poi.getDate().getTime());
+                    }
                 }
             }
         }

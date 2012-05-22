@@ -75,7 +75,6 @@ public class ServerPoiList extends PoiList {
             }
         }
     }
-    
     /**
      * Version of the xml file.
      */
@@ -137,28 +136,30 @@ public class ServerPoiList extends PoiList {
     }
 
     private void writePoi(XMLStreamWriter writer, DateFormat dateFormat, List<Poi> points) throws XMLStreamException {
-        for (Poi poi : points) {
-            writer.writeStartElement("poi");
-            writer.writeAttribute("type", poi.getType().name());
-            writer.writeAttribute("latitude", ((Double) poi.getLat()).toString());
-            writer.writeAttribute("longitude", ((Double) poi.getLon()).toString());
-            writer.writeAttribute("date", dateFormat.format(poi.getDate()));
+        synchronized (points) {
+            for (Poi poi : points) {
+                writer.writeStartElement("poi");
+                writer.writeAttribute("type", poi.getType().name());
+                writer.writeAttribute("latitude", ((Double) poi.getLat()).toString());
+                writer.writeAttribute("longitude", ((Double) poi.getLon()).toString());
+                writer.writeAttribute("date", dateFormat.format(poi.getDate()));
 
-            writer.writeStartElement("confirmations");
-            writer.writeCharacters(((Integer) poi.getConfirmations()).toString());
-            writer.writeEndElement();
+                writer.writeStartElement("confirmations");
+                writer.writeCharacters(((Integer) poi.getConfirmations()).toString());
+                writer.writeEndElement();
 
-            writer.writeStartElement("refutations");
-            writer.writeCharacters(((Integer) poi.getRefutations()).toString());
-            writer.writeEndElement();
+                writer.writeStartElement("refutations");
+                writer.writeCharacters(((Integer) poi.getRefutations()).toString());
+                writer.writeEndElement();
 
-            if (poi.getRemovedDate() != null) {
-                writer.writeStartElement("removedDate");
-                writer.writeCharacters(dateFormat.format(poi.getRemovedDate()));
+                if (poi.getRemovedDate() != null) {
+                    writer.writeStartElement("removedDate");
+                    writer.writeCharacters(dateFormat.format(poi.getRemovedDate()));
+                    writer.writeEndElement();
+                }
+
                 writer.writeEndElement();
             }
-
-            writer.writeEndElement();
         }
     }
 

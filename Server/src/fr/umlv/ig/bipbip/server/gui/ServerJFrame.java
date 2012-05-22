@@ -52,7 +52,6 @@ public class ServerJFrame extends JFrame {
 
     private static final int FRAME_WIDTH = 770;
     private static final int FRAME_HEIGHT = 430;
-    
     // Connected objects
     private final Server server;
     private final ArrayList<Logger> loggersToDisplay;
@@ -207,13 +206,15 @@ public class ServerJFrame extends JFrame {
         map = new JMapViewer();
 
         // Filling the map with the already defined POI.
-        for (Poi poi : serverPoiList.getPois()) {
-            // Storing the JPOI
-            JPoi jpoi = new JPoi(poi);
-            poiToJPoi.put(poi, jpoi);
+        synchronized (serverPoiList.getPois()) {
+            for (Poi poi : serverPoiList.getPois()) {
+                // Storing the JPOI
+                JPoi jpoi = new JPoi(poi);
+                poiToJPoi.put(poi, jpoi);
 
-            // Displaying the marker.
-            map.addMapMarker(jpoi);
+                // Displaying the marker.
+                map.addMapMarker(jpoi);
+            }
         }
 
         verticalSplitPane.setLeftComponent(map);
@@ -453,13 +454,15 @@ public class ServerJFrame extends JFrame {
             serverPoiList.addPoiListener(new PoiEventHandler());
 
             // Filling the map with the new defined POI.
-            for (Poi poi : serverPoiList.getPois()) {
-                // Storing the JPOI
-                JPoi jpoi = new JPoi(poi);
-                poiToJPoi.put(poi, jpoi);
+            synchronized (serverPoiList.getPois()) {
+                for (Poi poi : serverPoiList.getPois()) {
+                    // Storing the JPOI
+                    JPoi jpoi = new JPoi(poi);
+                    poiToJPoi.put(poi, jpoi);
 
-                // Displaying the marker.
-                map.addMapMarker(jpoi);
+                    // Displaying the marker.
+                    map.addMapMarker(jpoi);
+                }
             }
 
             // Updating the JTables
@@ -565,7 +568,7 @@ public class ServerJFrame extends JFrame {
         }
         index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
 
-        Poi poi = (Poi) serverPoiList.getPois().toArray()[index];
+        Poi poi = (Poi) serverPoiList.getPois().get(index);
 
         PoiEditJFrame frame = new PoiEditJFrame(this, serverPoiList, poi);
         frame.setVisible(true);
@@ -588,7 +591,7 @@ public class ServerJFrame extends JFrame {
         Poi[] poiToDeletes = new Poi[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int index = poiTable.convertRowIndexToModel(selectedRows[i]);
-            poiToDeletes[i] = (Poi) serverPoiList.getPois().toArray()[index];
+            poiToDeletes[i] = (Poi) serverPoiList.getPois().get(index);
         }
 
         for (Poi poi : poiToDeletes) {
@@ -664,7 +667,7 @@ public class ServerJFrame extends JFrame {
 
     /**
      * Model displaying the logs.
-     * 
+     *
      * Thread safe.
      */
     private class LogListModel extends AbstractListModel<LogRecord> {
