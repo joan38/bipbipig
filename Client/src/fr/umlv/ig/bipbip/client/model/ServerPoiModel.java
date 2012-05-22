@@ -146,7 +146,6 @@ public class ServerPoiModel implements PoiModel {
 
         try {
             server.notSeen(poi);
-            update(new Coordinate(poi.getLat(), poi.getLon()));
         } catch (IOException e) {
             throw new IOException("Connection problem: Unable to declare the POI as not seen", e);
         }

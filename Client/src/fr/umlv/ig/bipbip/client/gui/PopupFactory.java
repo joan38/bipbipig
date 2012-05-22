@@ -90,7 +90,7 @@ public final class PopupFactory {
         popupMenu.add(confirmation);
 
         JMenuItem refutation = new JMenuItem("Not seen", ImageFactory.getImage("delete.png"));
-        refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, infos));
+        refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, map, infos));
         popupMenu.add(refutation);
 
         return popupMenu;

@@ -118,9 +118,10 @@ public final class ListenerFactory {
         };
     }
 
-    public static ActionListener getNotSeenButtonListener(final Poi poi, final ServerPoiModel model, final JLabel infos) {
+    public static ActionListener getNotSeenButtonListener(final Poi poi, final ServerPoiModel model, final JMapViewer map, final JLabel infos) {
         Objects.requireNonNull(poi);
         Objects.requireNonNull(model);
+        Objects.requireNonNull(map);
         Objects.requireNonNull(infos);
         
         return new ActionListener() {
@@ -129,6 +130,7 @@ public final class ListenerFactory {
             public void actionPerformed(ActionEvent event) {
                 try {
                     model.notSeen(poi);
+                    model.update(map.getPosition());
                     infos.setText(" ");
                     JOptionPane.showMessageDialog(null,
                             "POI declared as not seen, thank you for your contribution",
