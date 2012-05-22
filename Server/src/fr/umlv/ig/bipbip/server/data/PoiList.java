@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Generic collection of point of interests.
  *
- * The implementation rely on a synchronized sorted set. (No concurrency
+ * The implementation rely on a synchronized array list. (No concurrency
  * problem).
  *
  * @author Damien Girard <dgirard@nativesoft.fr>
@@ -31,15 +31,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PoiList {
 
     // Contains the currently active points.
-    private final SortedSet<Poi> activePoints = Collections.synchronizedSortedSet(new TreeSet<Poi>(new PoiComparator()));
+    private final List<Poi> activePoints = Collections.synchronizedList(new ArrayList<Poi>());
     // Contains all the points ever added or removed.
-    private final Map<Poi, Date> points = Collections.synchronizedMap(new HashMap<Poi, Date>());
-    
+    private final List<Poi> removedPoints = Collections.synchronizedList(new ArrayList<Poi>());
     private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
     /**
      * Precision of the searches operations on the POI collection.
      */
-    public static final double PRECISION = 0.4;
+    public static final double PRECISION = 500;
 
     /**
      * Create an empty list of POI.
@@ -112,9 +111,6 @@ public class PoiList {
      */
     public void addPOI(Poi p) {
         activePoints.add(p);
-        
-        // Storing the history poi.
-        points.put(p, null);
 
         firePOIAdded(new PoiEvent(this, p));
     }
@@ -126,8 +122,9 @@ public class PoiList {
      */
     public void removePOI(Poi p) {
         activePoints.remove(p);
-        
-        points.put(p, new Date()); // Marking the POI as removed.
+
+        p.setRemovedDate(new Date());
+        removedPoints.add(p);
 
         firePOIRemoved(new PoiEvent(this, p));
     }
@@ -142,20 +139,28 @@ public class PoiList {
      *
      * @return A list of all POI contained between those two points.
      */
-    public ArrayList<Poi> getPointsBetween(double latitude1, double longitude1, double latitude2, double longitude2) {
-        Poi p1 = new DummyPOI(latitude1, longitude1);
-        Poi p2 = new DummyPOI(latitude2, longitude2);
-
+    public ArrayList<Poi> getPointsInAreaBetween(double latitude, double longitude, double distanceArea) {
         ArrayList<Poi> result = new ArrayList<Poi>();
-        SortedSet<Poi> pointsSouthEast = activePoints.subSet(p2, p1);
-        for (Poi poi : pointsSouthEast) {
-            if (activePoints.comparator().compare(poi, p2) >= 0) {
+        for (Poi poi : activePoints) {
+            double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
+            if (calcDistance < distanceArea) {
                 result.add(poi);
             }
         }
 
         return result;
     }
+    
+    public static double getDistanceInMeter(double latitude1, double longitude1, double latitude2, double longitude2) {
+        return NB_METER_OF_NAUTICAL_MILE * 60 * Math.acos(Math.sin(latitude1) * Math.sin(latitude2) + Math.cos(latitude1) * Math.cos(latitude2) * Math.cos(longitude2 - longitude1));
+    }
+    
+    /**
+     * Number of meter in one mile.
+     *
+     * 1 mile = 1852 m
+     */
+    private static final int NB_METER_OF_NAUTICAL_MILE = 1852;
 
     /**
      * Looks up POIs at the position x/y.
@@ -170,14 +175,14 @@ public class PoiList {
      * @return A list of POI found at this position.
      */
     public ArrayList<Poi> getPoiAt(Double latitude, Double longitude, PoiType type) {  // TODO: Faux, look getpointsbetween
-        Poi p1 = new DummyPOI(latitude + PRECISION, longitude - PRECISION, type);
-        Poi p2 = new DummyPOI(latitude - PRECISION, longitude + PRECISION, type);
-
         ArrayList<Poi> result = new ArrayList<Poi>();
-        PoiComparator poiComparatorNorthWest = new PoiComparator();
-        SortedSet<Poi> list = activePoints.subSet(p1, p2);
-        for (Poi poi : list) {
-            if (poiComparatorNorthWest.compare(poi, p2) >= 0 && poi.getType().equals(type)) {
+        for (Poi poi : activePoints) {
+            if (!poi.getType().equals(type)) {
+                continue;
+            }
+
+            double calcDistance = getDistanceInMeter(latitude, longitude, poi.getLat(), poi.getLon());
+            if (calcDistance < PRECISION) {
                 result.add(poi);
             }
         }
@@ -188,17 +193,48 @@ public class PoiList {
     /**
      * Gets the points.
      */
-    public SortedSet<Poi> getPoints() {
+    public List<Poi> getPoints() {
         return activePoints;
     }
 
     /**
-     * Gets all points.
-     * 
-     * @return A map that contains all points, including the removed one. The Date in the map is when the element has been removed. (Set to null)
+     * Gets the removed points.
      */
-    public Map<Poi, Date> getAllPoints() {
-        return points;
+    public List<Poi> getRemovedPoints() {
+        return removedPoints;
+    }
+
+    /**
+     * Gets all points at a date.
+     * 
+     * @param date Date to display all points.
+     * @param outMinDate The minimum date value.
+     * 
+     * Be aware that this method have a complexity of "n".
+     * 
+     * @return A set that contains all points, including the removed one.
+     */
+    public ArrayList<Poi> getAllPoints(Date date, Date outMinDate) {
+        ArrayList<Poi> result = new ArrayList<Poi>();
+
+        for (Poi poi : activePoints) {
+            if (poi.getDate().compareTo(date) <= 0) {
+                result.add(poi);
+                if (poi.getDate().compareTo(outMinDate) < 0) {
+                    outMinDate.setTime(poi.getDate().getTime());
+                }
+            }
+        }
+        for (Poi poi : removedPoints) {
+            if (poi.getDate().compareTo(date) <= 0 && poi.getRemovedDate().compareTo(date) >= 0) {
+                result.add(poi);
+                if (poi.getDate().compareTo(outMinDate) < 0) {
+                    outMinDate.setTime(poi.getDate().getTime());
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

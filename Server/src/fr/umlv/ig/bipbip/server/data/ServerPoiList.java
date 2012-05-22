@@ -25,8 +25,10 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +44,7 @@ import javax.xml.stream.*;
  */
 public class ServerPoiList extends PoiList {
     // Debug logger.
+
     private static final Logger logger = Logger.getLogger(PoiList.class.getName());
     /**
      * After X refutations, delete the POI.
@@ -117,25 +120,23 @@ public class ServerPoiList extends PoiList {
      */
     @Override
     public void addPOI(Poi p) {
-        ArrayList<Poi> pointsBetween = getPointsBetween(p.getLat() - ADD_PRECISION, p.getLon() - ADD_PRECISION, p.getLat() + ADD_PRECISION, p.getLon() + ADD_PRECISION);
+        ArrayList<Poi> pointsBetween = getPoiAt(p.getLat(), p.getLon(), p.getType());
 
-        if (pointsBetween.isEmpty()) {  // TODO
+        if (pointsBetween.isEmpty()) { 
             super.addPOI(p);
             return;
         }
 
         // POI founds, checking for the type and incrementing the number of confirmations.
         for (Poi poi : pointsBetween) {
-            if (poi.getType().equals(p.getType())) {
-                logger.log(Level.FINE, "Confirmation of {0}", poi);
+                logger.log(Level.FINE, "Confirmation of "+ poi);
                 poi.setConfirmations(poi.getConfirmations() + 1);
                 firePOIUpdated(new PoiEvent(this, poi));
                 return;
-            }
         }
 
         // POI of the type not found, adding a new one so.
-        logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so {0}", p);
+        logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so "+ p);
         super.addPOI(p);
     }
 
@@ -157,7 +158,19 @@ public class ServerPoiList extends PoiList {
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
 
         // Writing the POIs.
-        for (Poi poi : this.getPoints()) {
+        writePoi(writer, dateFormat, this.getPoints());
+        writePoi(writer, dateFormat, this.getRemovedPoints());
+
+        writer.writeEndElement();
+
+        writer.writeEndDocument();
+
+        writer.flush();
+        writer.close();
+    }
+
+    private void writePoi(XMLStreamWriter writer, DateFormat dateFormat, List<Poi> points) throws XMLStreamException {
+        for (Poi poi : points) {
             writer.writeStartElement("poi");
             writer.writeAttribute("type", poi.getType().name());
             writer.writeAttribute("latitude", ((Double) poi.getLat()).toString());
@@ -172,15 +185,14 @@ public class ServerPoiList extends PoiList {
             writer.writeCharacters(((Integer) poi.getRefutations()).toString());
             writer.writeEndElement();
 
+            if (poi.getRemovedDate() != null) {
+                writer.writeStartElement("removedDate");
+                writer.writeCharacters(dateFormat.format(poi.getRemovedDate()));
+                writer.writeEndElement();
+            }
+
             writer.writeEndElement();
         }
-
-        writer.writeEndElement();
-
-        writer.writeEndDocument();
-
-        writer.flush();
-        writer.close();
     }
 
     public static ServerPoiList readFromFile(FileInputStream input) throws XMLStreamException, Exception {
@@ -241,11 +253,17 @@ public class ServerPoiList extends PoiList {
                         currentPoi.setConfirmations(Integer.parseInt(reader.getElementText()));
                     } else if (reader.getLocalName().equals("refutations")) {
                         currentPoi.setNbNotSeen(Integer.parseInt(reader.getElementText()));
+                    } else if (reader.getLocalName().equals("removedDate")) {
+                        currentPoi.setRemovedDate(dateFormat.parse(reader.getElementText()));
                     }
                     break;
                 case XMLStreamConstants.END_ELEMENT:
                     if (reader.getLocalName().equals("poi") && currentPoi != null) {
-                        poiList.addPOI(currentPoi);
+                        if (currentPoi.getRemovedDate() == null) {
+                            poiList.getPoints().add(currentPoi);
+                        } else {
+                            poiList.getRemovedPoints().add(currentPoi);
+                        }
                         currentPoi = null;
                     }
                     break;

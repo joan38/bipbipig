@@ -17,13 +17,10 @@
 package fr.umlv.ig.bipbip.server.gui;
 
 import fr.umlv.ig.bipbip.poi.Poi;
-import fr.umlv.ig.bipbip.poi.PoiEvent;
-import fr.umlv.ig.bipbip.poi.PoiListener;
-import fr.umlv.ig.bipbip.poi.swing.JPoi;
+import java.awt.Color;
 import java.awt.Component;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Objects;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -60,7 +57,17 @@ public class JPoiTable extends JTable {
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                return super.getTableCellRendererComponent(table, DateFormat.getDateTimeInstance().format((Date) value), isSelected, hasFocus, row, column);
+                String text = "Active";
+                if (value != null)
+                    text = DateFormat.getDateTimeInstance().format((Date) value);
+                Component tableCellRendererComponent = super.getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
+                
+                if (value == null)
+                    tableCellRendererComponent.setForeground(Color.green.darker());
+                else
+                    tableCellRendererComponent.setForeground(Color.black);
+                
+                return tableCellRendererComponent;
             }
         });
         this.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -96,7 +103,7 @@ public class JPoiTable extends JTable {
 
         PoiTableModel model = (PoiTableModel) this.getModel();
 
-        Poi poi = (Poi) model.getPoiList().getPoints().toArray()[index];
+        Poi poi = (Poi) model.getPoints().toArray()[index];
         map.setDisplayPositionByLatLon(poi.getLat(), poi.getLon(), map.getZoom());
     }
 }

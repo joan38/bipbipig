@@ -19,7 +19,6 @@ package fr.umlv.ig.bipbip.server.gui;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
-import fr.umlv.ig.bipbip.poi.PoiType;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
 import fr.umlv.ig.bipbip.server.Server;
 import fr.umlv.ig.bipbip.server.data.ServerPoiList;
@@ -40,8 +39,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.xml.stream.XMLStreamException;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -58,7 +55,7 @@ public class ServerJFrame extends JFrame {
     private final ArrayList<Logger> loggersToDisplay;
     private ServerPoiList serverPOIList;
     private final LogListModel clientCommandLogList;
-    private final PoiTableModel poiTableModel;
+    private final PoiActiveTableModel poiTableModel;
     // For the JMapPanel
     private final HashMap<Poi, JPoi> poiToJPoi = new HashMap<Poi, JPoi>();
     //
@@ -101,6 +98,8 @@ public class ServerJFrame extends JFrame {
     private JTable poiTable;
     // File chooser
     JFileChooser databaseFileChooser;
+    // PoiHistory
+    PoiHistoryJFrame historyJFrame = null;
 
     /**
      * Creates a new server frame.
@@ -133,7 +132,7 @@ public class ServerJFrame extends JFrame {
         }
 
         // Registering the pois table.
-        poiTableModel = new PoiTableModel(serverPOIList, false);
+        poiTableModel = new PoiActiveTableModel(serverPOIList);
         serverPOIList.addPOIListener(new POIEventHandler());
 
         // Creation of the GUI.
@@ -232,6 +231,11 @@ public class ServerJFrame extends JFrame {
         poiRemove = new JButton("Remove POI");
         poiToolbar.add(poiRemove);
 
+        poiToolbar.add(new JToolBar.Separator());
+
+        poiHistory = new JButton("History");
+        poiToolbar.add(poiHistory);
+
         // File chooser
         databaseFileChooser = new JFileChooser();
         databaseFileChooser.setFileFilter(new FileNameExtensionFilter("XML file", "xml"));
@@ -258,7 +262,7 @@ public class ServerJFrame extends JFrame {
         poiTableScrollPane = new JScrollPane(poiTable);
         poiPanel.add(poiTableScrollPane, BorderLayout.CENTER);
 
-        RowSorter<PoiTableModel> sorter = new TableRowSorter<PoiTableModel>(poiTableModel);
+        RowSorter<PoiActiveTableModel> sorter = new TableRowSorter<PoiActiveTableModel>(poiTableModel);
         sorter.toggleSortOrder(0);
         poiTable.setRowSorter(sorter);
 
@@ -284,6 +288,14 @@ public class ServerJFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 removeSelectedPoi();
+            }
+        });
+
+        poiHistory.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayHistoryFrame();
             }
         });
 
@@ -375,6 +387,15 @@ public class ServerJFrame extends JFrame {
         listElementSelected();
     }
 
+    private void displayHistoryFrame() {
+        if (historyJFrame == null) {
+            historyJFrame = new PoiHistoryJFrame(serverPOIList);
+            historyJFrame.setVisible(true);
+        } else {
+            historyJFrame.setVisible(true);
+        }
+    }
+
     /**
      * Asks the user to open a database file.
      */
@@ -406,6 +427,7 @@ public class ServerJFrame extends JFrame {
             try {
                 // Opening the file.
                 serverPOIList = ServerPoiList.readFromFile(inputStream);
+                poiTable.setModel(new PoiActiveTableModel(serverPOIList));
             } catch (XMLStreamException ex) {
                 JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -437,11 +459,13 @@ public class ServerJFrame extends JFrame {
             }
 
             // Updating the JTables
-            poiTable.setModel(new PoiTableModel(serverPOIList, false));
-
-            //poiTable.revalidate();
-            //poiTable.repaint();
             map.repaint();
+
+            // Closing the history window.
+            if (historyJFrame != null) {
+                historyJFrame.setVisible(false);
+                historyJFrame = null;
+            }
 
             if (serverIsRunning) {
                 if (JOptionPane.showConfirmDialog(this, "Database loaded.\n\nDo you want to restart the server?", "Open a database", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -580,6 +604,10 @@ public class ServerJFrame extends JFrame {
             poiEdit.setEnabled(false);
         } else {
             poiEdit.setEnabled(true);
+
+
+
+
         }
     }
 
@@ -636,12 +664,13 @@ public class ServerJFrame extends JFrame {
      * Thread safe.
      */
     private class LogListModel extends AbstractListModel<LogRecord> {
+
         private List<LogRecord> list = Collections.synchronizedList(new ArrayList<LogRecord>());
-        
+
         public void add(LogRecord record) {
             list.add(record);
             fireIntervalAdded(this, list.size() - 1, list.size());
-            
+
             // Scroll to bottom.
             SwingUtilities.invokeLater(new Runnable() {
 
@@ -651,8 +680,8 @@ public class ServerJFrame extends JFrame {
                 }
             });
         }
-        
-        public void clear(){
+
+        public void clear() {
             int size = list.size();
             list.clear();
             fireIntervalRemoved(this, 0, size);
