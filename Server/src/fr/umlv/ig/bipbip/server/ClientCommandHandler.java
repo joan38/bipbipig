@@ -148,7 +148,7 @@ public enum ClientCommandHandler {
                 throw new IOException("Invalid date: " + d);
             }
             // Looking for the POI.
-            ArrayList<Poi> poiAt = poiList.getPoiAt(x, y, event);
+            ArrayList<Poi> poiAt = poiList.getPoisAround(x, y, event);
 
             // Looking for the POI dates.
             Poi poi = null;

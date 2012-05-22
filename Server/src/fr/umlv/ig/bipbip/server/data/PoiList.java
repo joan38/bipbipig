@@ -174,7 +174,7 @@ public class PoiList {
      *
      * @return A list of POI found at this position.
      */
-    public ArrayList<Poi> getPoiAt(Double latitude, Double longitude, PoiType type) {  // TODO: Faux, look getpointsbetween
+    public ArrayList<Poi> getPoisAround(Double latitude, Double longitude, PoiType type) {
         ArrayList<Poi> result = new ArrayList<Poi>();
         for (Poi poi : activePoints) {
             if (!poi.getType().equals(type)) {

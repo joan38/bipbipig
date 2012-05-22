@@ -39,9 +39,10 @@ import javax.xml.stream.*;
  * @author Damien Girard <dgirard@nativesoft.fr>
  */
 public class ServerPoiList extends PoiList {
+    
     // Debug logger.
-
     private static final Logger logger = Logger.getLogger(PoiList.class.getName());
+    
     /**
      * After X refutations, delete the POI.
      */
@@ -58,9 +59,8 @@ public class ServerPoiList extends PoiList {
      * @see #NB_REFUTATION_FOR_DELETE
      */
     public void notSeen(Poi p) {
-        ArrayList<Poi> list = getPoiAt(p.getLat(), p.getLon(), p.getType());
-        if (list.isEmpty()) // POI not found.
-        {
+        ArrayList<Poi> list = getPoisAround(p.getLat(), p.getLon(), p.getType());
+        if (list.isEmpty()) { // POI not found.
             logger.log(Level.INFO, "Not seen: Request of a POI not found. x: {0} y: {1}", new Object[]{p.getLat(), p.getLon()});
             return;
         }
@@ -88,9 +88,8 @@ public class ServerPoiList extends PoiList {
             poiToUse.setNbNotSeen(refutations);
             firePoiUpdated(new PoiEvent(this, poiToUse));
         }
-
-        // OK.
     }
+    
     /**
      * Version of the xml file.
      */
@@ -107,15 +106,15 @@ public class ServerPoiList extends PoiList {
      */
     @Override
     public void addPoi(Poi p) {
-        ArrayList<Poi> pointsBetween = getPoiAt(p.getLat(), p.getLon(), p.getType());
+        ArrayList<Poi> poisAround = getPoisAround(p.getLat(), p.getLon(), p.getType());
 
-        if (pointsBetween.isEmpty()) { 
+        if (poisAround.isEmpty()) { 
             super.addPoi(p);
             return;
         }
 
         // POI founds, checking for the type and incrementing the number of confirmations.
-        for (Poi poi : pointsBetween) {
+        for (Poi poi : poisAround) {
                 logger.log(Level.FINE, "Confirmation of "+ poi);
                 poi.setConfirmations(poi.getConfirmations() + 1);
                 firePoiUpdated(new PoiEvent(this, poi));
