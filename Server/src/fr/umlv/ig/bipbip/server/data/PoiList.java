@@ -49,9 +49,9 @@ public class PoiList {
     /**
      * Adds a POI listener to the collection.
      *
-     * @param listener The POIListener to be added.
+     * @param listener The PoiListener to be added.
      */
-    public void addPOIListener(PoiListener listener) {
+    public void addPoiListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
         listeners.add(listener);
@@ -60,9 +60,9 @@ public class PoiList {
     /**
      * Removes a POI listener from the collection.
      *
-     * @param listener The POIListener to be removed.
+     * @param listener The PoiListener to be removed.
      */
-    public void removePOIListener(PoiListener listener) {
+    public void removePoiListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
         listeners.remove(listener);
@@ -73,7 +73,7 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePOIAdded(PoiEvent e) {
+    protected void firePoiAdded(PoiEvent e) {
         for (PoiListener listener : listeners) {
             listener.poiAdded(e);
         }
@@ -84,7 +84,7 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePOIUpdated(PoiEvent e) {
+    protected void firePoiUpdated(PoiEvent e) {
         for (PoiListener listener : listeners) {
             listener.poiUpdated(e);
         }
@@ -95,7 +95,7 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePOIRemoved(PoiEvent e) {
+    protected void firePoiRemoved(PoiEvent e) {
         for (PoiListener listener : listeners) {
             listener.poiRemoved(e);
         }
@@ -109,10 +109,10 @@ public class PoiList {
      *
      * @param p POI to add.
      */
-    public void addPOI(Poi p) {
+    public void addPoi(Poi p) {
         activePoints.add(p);
 
-        firePOIAdded(new PoiEvent(this, p));
+        firePoiAdded(new PoiEvent(this, p));
     }
 
     /**
@@ -120,13 +120,13 @@ public class PoiList {
      *
      * @param p POI to add.
      */
-    public void removePOI(Poi p) {
+    public void removePoi(Poi p) {
         activePoints.remove(p);
 
         p.setRemovedDate(new Date());
         removedPoints.add(p);
 
-        firePOIRemoved(new PoiEvent(this, p));
+        firePoiRemoved(new PoiEvent(this, p));
     }
 
     /**
@@ -258,8 +258,8 @@ public class PoiList {
         activePoints.remove(oldPoi);
         activePoints.add(newPoi);
 
-        this.firePOIRemoved(new PoiEvent(this, oldPoi));
-        this.firePOIAdded(new PoiEvent(this, newPoi));
+        this.firePoiRemoved(new PoiEvent(this, oldPoi));
+        this.firePoiAdded(new PoiEvent(this, newPoi));
     }
 
     /**
@@ -267,13 +267,13 @@ public class PoiList {
      *
      * Used only to make searches operations easier.
      */
-    private static class DummyPOI extends AbstractReportedPoi {
+    private static class DummyPoi extends AbstractReportedPoi {
 
-        private DummyPOI(double latitude, double longitude) {
+        private DummyPoi(double latitude, double longitude) {
             super(latitude, longitude, PoiType.MISCELLANEOUS, new Date());
         }
 
-        private DummyPOI(double latitude, double longitude, PoiType type) {
+        private DummyPoi(double latitude, double longitude, PoiType type) {
             super(latitude, longitude, type, new Date());
         }
     }

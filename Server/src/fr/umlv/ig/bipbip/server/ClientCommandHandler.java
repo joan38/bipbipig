@@ -16,15 +16,14 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
+import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,7 +92,7 @@ public enum ClientCommandHandler {
             Poi poi = event.constructPoi(x, y, date, confirmations);
 
             // Adding the POI to the collection.
-            poiList.addPOI(poi);
+            poiList.addPoi(poi);
 
             logger.log(Level.INFO, "CLIENT: SUBMIT " + event.name() + " " + x + " " + y + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
         }

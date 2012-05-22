@@ -47,7 +47,7 @@ public class PoiHistoryTableModel extends AbstractTableModel implements PoiTable
      */
     public PoiHistoryTableModel(PoiList poiList) {
         this.poiList = poiList;
-        this.poiList.addPOIListener(new POIEventHandler()); // Listening the changes in the poilist.
+        this.poiList.addPoiListener(new PoiEventHandler()); // Listening the changes in the poilist.
         
         this.currentFilterDate = new Date();
         firstPoiDate = new Date();
@@ -134,7 +134,7 @@ public class PoiHistoryTableModel extends AbstractTableModel implements PoiTable
         return poiData;
     }
 
-    private class POIEventHandler implements PoiListener {
+    private class PoiEventHandler implements PoiListener {
 
         @Override
         public void poiAdded(PoiEvent e) {

@@ -88,9 +88,9 @@ public class BipbipServer {
         Server server = new Server(port);
 
         // Some dummy points.
-        server.getPoiList().addPOI(new FixedSpeedCam(50, 50, new Date()));
-        server.getPoiList().addPOI(new MobileSpeedCam(100, 100, new Date()));
-        server.getPoiList().addPOI(new RoadWorks(48.836659, 2.709975, new Date()));
+        server.getPoiList().addPoi(new FixedSpeedCam(50, 50, new Date()));
+        server.getPoiList().addPoi(new MobileSpeedCam(100, 100, new Date()));
+        server.getPoiList().addPoi(new RoadWorks(48.836659, 2.709975, new Date()));
 
         // Launching the server GUI.
         ServerJFrame frame = new ServerJFrame(server, loggersToDisplayInGui, server.getPoiList());

@@ -49,7 +49,7 @@ public class PoiActiveTableModel extends AbstractTableModel implements PoiTableM
      */
     public PoiActiveTableModel(PoiList poiList) {
         this.poiList = poiList;
-        this.poiList.addPOIListener(new POIEventHandler()); // Listening the changes in the poilist.
+        this.poiList.addPoiListener(new PoiEventHandler()); // Listening the changes in the poilist.
     }
 
     @Override
@@ -99,7 +99,7 @@ public class PoiActiveTableModel extends AbstractTableModel implements PoiTableM
         return poiList.getPoints();
     }
 
-    private class POIEventHandler implements PoiListener {
+    private class PoiEventHandler implements PoiListener {
 
         @Override
         public void poiAdded(PoiEvent e) {

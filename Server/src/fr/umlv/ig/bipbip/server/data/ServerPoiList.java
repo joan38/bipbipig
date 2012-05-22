@@ -23,13 +23,9 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.stream.*;
@@ -50,15 +46,6 @@ public class ServerPoiList extends PoiList {
      * After X refutations, delete the POI.
      */
     public static final int NB_REFUTATION_FOR_DELETE = 3;
-    /**
-     * When a POI is added, the server is looking for already existing POI near
-     * the position with a precision of this constant.
-     *
-     * If a POI is found, then the number of confirmation is increased.
-     *
-     * @see #addPOI(fr.umlv.ig.bipbip.poi.POI)
-     */
-    public static final double ADD_PRECISION = 0.1;
 
     /**
      * Increment the number of refutation of a POI.
@@ -96,10 +83,10 @@ public class ServerPoiList extends PoiList {
         // POI get, marking it as notSeen.
         int refutations = poiToUse.getRefutations() + 1;
         if (refutations >= NB_REFUTATION_FOR_DELETE) {
-            removePOI(poiToUse);
+            removePoi(poiToUse);
         } else {
             poiToUse.setNbNotSeen(refutations);
-            firePOIUpdated(new PoiEvent(this, poiToUse));
+            firePoiUpdated(new PoiEvent(this, poiToUse));
         }
 
         // OK.
@@ -119,11 +106,11 @@ public class ServerPoiList extends PoiList {
      * @see #addPrecision
      */
     @Override
-    public void addPOI(Poi p) {
+    public void addPoi(Poi p) {
         ArrayList<Poi> pointsBetween = getPoiAt(p.getLat(), p.getLon(), p.getType());
 
         if (pointsBetween.isEmpty()) { 
-            super.addPOI(p);
+            super.addPoi(p);
             return;
         }
 
@@ -131,13 +118,13 @@ public class ServerPoiList extends PoiList {
         for (Poi poi : pointsBetween) {
                 logger.log(Level.FINE, "Confirmation of "+ poi);
                 poi.setConfirmations(poi.getConfirmations() + 1);
-                firePOIUpdated(new PoiEvent(this, poi));
+                firePoiUpdated(new PoiEvent(this, poi));
                 return;
         }
 
         // POI of the type not found, adding a new one so.
         logger.log(Level.FINE, "POI found, but with a different type. Adding the POI so "+ p);
-        super.addPOI(p);
+        super.addPoi(p);
     }
 
     /**
@@ -268,12 +255,9 @@ public class ServerPoiList extends PoiList {
                     }
                     break;
                 //case XMLStreamConstants.CHARACTERS:
-
-                //    break;
             }
         }
 
-        // Finished ;)
         return poiList;
     }
 }

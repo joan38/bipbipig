@@ -53,7 +53,7 @@ public class ServerJFrame extends JFrame {
     // Connected objects
     private final Server server;
     private final ArrayList<Logger> loggersToDisplay;
-    private ServerPoiList serverPOIList;
+    private ServerPoiList serverPoiList;
     private final LogListModel clientCommandLogList;
     private final PoiActiveTableModel poiTableModel;
     // For the JMapPanel
@@ -107,13 +107,13 @@ public class ServerJFrame extends JFrame {
      * @param server Server to connect to.
      * @param loggersToDisplay Collections of loggers to display inside this
      * window.
-     * @param serverPOIList List of points of interests to connect to.
+     * @param serverPoiList List of points of interests to connect to.
      */
-    public ServerJFrame(Server server, ArrayList<Logger> loggersToDisplay, ServerPoiList serverPOIList) {
+    public ServerJFrame(Server server, ArrayList<Logger> loggersToDisplay, ServerPoiList serverPoiList) {
         super("Bipbip server - Port: " + server.getPort());
         Objects.requireNonNull(server);
         Objects.requireNonNull(loggersToDisplay);
-        Objects.requireNonNull(serverPOIList);
+        Objects.requireNonNull(serverPoiList);
 
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -121,7 +121,7 @@ public class ServerJFrame extends JFrame {
 
         // Linking with objects.
         this.server = server;
-        this.serverPOIList = serverPOIList;
+        this.serverPoiList = serverPoiList;
 
         // Registering the loggers.
         clientCommandLogList = new LogListModel();
@@ -132,8 +132,8 @@ public class ServerJFrame extends JFrame {
         }
 
         // Registering the pois table.
-        poiTableModel = new PoiActiveTableModel(serverPOIList);
-        serverPOIList.addPOIListener(new POIEventHandler());
+        poiTableModel = new PoiActiveTableModel(serverPoiList);
+        serverPoiList.addPoiListener(new PoiEventHandler());
 
         // Creation of the GUI.
 
@@ -203,7 +203,7 @@ public class ServerJFrame extends JFrame {
         map = new JMapViewer();
 
         // Filling the map with the already defined POI.
-        for (Poi poi : serverPOIList.getPoints()) {
+        for (Poi poi : serverPoiList.getPoints()) {
             // Storing the JPOI
             JPoi jpoi = new JPoi(poi);
             poiToJPoi.put(poi, jpoi);
@@ -389,7 +389,7 @@ public class ServerJFrame extends JFrame {
 
     private void displayHistoryFrame() {
         if (historyJFrame == null) {
-            historyJFrame = new PoiHistoryJFrame(serverPOIList);
+            historyJFrame = new PoiHistoryJFrame(serverPoiList);
             historyJFrame.setVisible(true);
         } else {
             historyJFrame.setVisible(true);
@@ -426,8 +426,8 @@ public class ServerJFrame extends JFrame {
 
             try {
                 // Opening the file.
-                serverPOIList = ServerPoiList.readFromFile(inputStream);
-                poiTable.setModel(new PoiActiveTableModel(serverPOIList));
+                serverPoiList = ServerPoiList.readFromFile(inputStream);
+                poiTable.setModel(new PoiActiveTableModel(serverPoiList));
             } catch (XMLStreamException e) {
                 JOptionPane.showMessageDialog(this, e.getLocalizedMessage(), "Error while opening the database", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -446,10 +446,10 @@ public class ServerJFrame extends JFrame {
             map.getMapMarkerList().clear();
 
             // Registering the new list. (MVC)
-            serverPOIList.addPOIListener(new POIEventHandler());
+            serverPoiList.addPoiListener(new PoiEventHandler());
 
             // Filling the map with the new defined POI.
-            for (Poi poi : serverPOIList.getPoints()) {
+            for (Poi poi : serverPoiList.getPoints()) {
                 // Storing the JPOI
                 JPoi jpoi = new JPoi(poi);
                 poiToJPoi.put(poi, jpoi);
@@ -500,7 +500,7 @@ public class ServerJFrame extends JFrame {
             }
 
             try {
-                serverPOIList.saveToFile(outputStream);
+                serverPoiList.saveToFile(outputStream);
                 JOptionPane.showMessageDialog(this, "Database successfully saved\n\nPath: " + file.toString());
             } catch (XMLStreamException ex) {
                 JOptionPane.showMessageDialog(this, ex, "Error while saving the database", JOptionPane.ERROR_MESSAGE);
@@ -542,7 +542,7 @@ public class ServerJFrame extends JFrame {
      * Displays the dialog to create a new POI.
      */
     private void createNewPoi() {
-        PoiEditJFrame frame = new PoiEditJFrame(this, serverPOIList, 0.0, 0.0);
+        PoiEditJFrame frame = new PoiEditJFrame(this, serverPoiList, 0.0, 0.0);
         frame.setVisible(true);
     }
 
@@ -561,9 +561,9 @@ public class ServerJFrame extends JFrame {
         }
         index = poiTable.convertRowIndexToModel(index); // Converting the value from the sorted display to the model one.
 
-        Poi poi = (Poi) serverPOIList.getPoints().toArray()[index];
+        Poi poi = (Poi) serverPoiList.getPoints().toArray()[index];
 
-        PoiEditJFrame frame = new PoiEditJFrame(this, serverPOIList, poi);
+        PoiEditJFrame frame = new PoiEditJFrame(this, serverPoiList, poi);
         frame.setVisible(true);
     }
 
@@ -584,11 +584,11 @@ public class ServerJFrame extends JFrame {
         Poi[] poiToDeletes = new Poi[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int index = poiTable.convertRowIndexToModel(selectedRows[i]);
-            poiToDeletes[i] = (Poi) serverPOIList.getPoints().toArray()[index];
+            poiToDeletes[i] = (Poi) serverPoiList.getPoints().toArray()[index];
         }
 
         for (Poi poi : poiToDeletes) {
-            serverPOIList.removePOI(poi);
+            serverPoiList.removePoi(poi);
         }
     }
 
@@ -614,11 +614,11 @@ public class ServerJFrame extends JFrame {
     /**
      * Handles the updates of the poi collection on the map.
      */
-    private class POIEventHandler implements PoiListener {
+    private class PoiEventHandler implements PoiListener {
 
         @Override
         public void poiAdded(PoiEvent e) {
-            // Storing the JPOI
+            // Storing the JPoi
             JPoi jpoi = new JPoi(e.getPoi());
             poiToJPoi.put(e.getPoi(), jpoi);
 
