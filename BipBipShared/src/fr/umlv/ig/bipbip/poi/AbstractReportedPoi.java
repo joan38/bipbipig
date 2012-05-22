@@ -28,6 +28,7 @@ public abstract class AbstractReportedPoi implements Poi {
     private final double longitude;
     private final PoiType type;
     private final Date date;
+    private Date removedDate = null;
     private int confirmations;
     private int refutations;
 
@@ -42,7 +43,7 @@ public abstract class AbstractReportedPoi implements Poi {
     public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date) {
         this(latitude, longitude, type, date, 0);
     }
-    
+
     /**
      * Creates a reported point of interest. (POI)
      *
@@ -55,7 +56,7 @@ public abstract class AbstractReportedPoi implements Poi {
     public AbstractReportedPoi(double latitude, double longitude, PoiType type, Date date, int confirmations) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(date);
-        
+
         this.latitude = latitude;
         this.longitude = longitude;
         this.type = type;
@@ -142,6 +143,26 @@ public abstract class AbstractReportedPoi implements Poi {
     @Override
     public void setNbNotSeen(int refutations) {
         this.refutations = refutations;
+    }
+
+    /**
+     * Gets the date when the Poi is removed.
+     * 
+     * @return The date when the poi was removed.
+     */
+    @Override
+    public Date getRemovedDate() {
+        return removedDate;
+    }
+
+    /**
+     * Set the removed date.
+     * 
+     * @param removedDate Date when the poi has been removed.
+     */
+    @Override
+    public void setRemovedDate(Date removedDate) {
+        this.removedDate = removedDate;
     }
 
     @Override
