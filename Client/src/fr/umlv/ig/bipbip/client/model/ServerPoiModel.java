@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
@@ -138,7 +137,6 @@ public class ServerPoiModel implements PoiModel {
         try {
             server.submit(poi);
             update(new Coordinate(poi.getLat(), poi.getLon()));
-            firePoiAdded(new PoiEvent(this, poi));
         } catch (IOException e) {
             throw new IOException("Connection problem: Unable to submit the POI", e);
         }

@@ -72,6 +72,8 @@ public class BipBipClient {
                 System.err.println("Invalid port number in arguments: " + args[1]);
                 return;
             }
+        } else if (args.length == 1) {
+            address = new InetSocketAddress(args[0], DEFAULT_PORT);
         } else {
             address = PopupFactory.requestConnectionAddress(DEFAULT_PORT);
             if (address == null) {
