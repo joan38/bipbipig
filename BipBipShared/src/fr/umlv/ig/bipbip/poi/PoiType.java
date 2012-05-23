@@ -40,7 +40,7 @@ public enum PoiType {
             return new FixedSpeedCam(latitude, longitude, date, confirmations);
         }
     },
-    MOBILE_SPEED_CAM("Mobile", "mobile_speed_cam.png") {
+    MOBILE_SPEED_CAM("Mobile speed cam", "mobile_speed_cam.png") {
 
         @Override
         public Poi constructPoi(double latitude, double longitude, Date date) {

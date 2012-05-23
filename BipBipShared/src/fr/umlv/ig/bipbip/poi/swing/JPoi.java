@@ -16,10 +16,9 @@
  */
 package fr.umlv.ig.bipbip.poi.swing;
 
+import fr.umlv.ig.bipbip.images.ImageFactory;
 import fr.umlv.ig.bipbip.poi.Poi;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import javax.swing.ImageIcon;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
@@ -78,5 +77,26 @@ public class JPoi implements MapMarker {
         
         iconArea = new Rectangle(x, y, imgWidth, imgHeight);
         g.drawImage(img.getImage(), x, y, null);
+        
+        // Confirmations
+        Integer confirmations = poi.getConfirmations();
+        
+        // Pastil
+        x = position.x + imgWidth/2 - 11;
+        y = position.y - imgHeight/2 - 8;
+        if (confirmations < 10) {
+            g.drawImage(ImageFactory.getImage("pastil_1_digit.png").getImage(), x, y, null);
+        } else if (confirmations < 100) {
+            g.drawImage(ImageFactory.getImage("pastil_2_digit.png").getImage(), x, y, null);
+        } else {
+            confirmations = 99;
+        }
+        
+        // Number
+        x = position.x + imgWidth/2 - 5;
+        y = position.y - imgHeight/2 + 7;
+        g.setFont(new Font(null, Font.BOLD, 12));
+        g.setColor(Color.WHITE);
+        g.drawString(confirmations.toString(), x, y);
     }
 }

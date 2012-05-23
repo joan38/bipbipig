@@ -25,7 +25,14 @@ public class PoiEvent {
 
     private final Object source;
     private final Poi poi;
+    private final Exception exception;
 
+    public PoiEvent(Object source, Poi poi, Exception exception) {
+        this.poi = poi;
+        this.source = source;
+        this.exception = exception;
+    }
+    
     /**
      * Creates a new point of interest event.
      *
@@ -33,8 +40,7 @@ public class PoiEvent {
      * @param poi Object emitting the event.
      */
     public PoiEvent(Object source, Poi poi) {
-        this.poi = poi;
-        this.source = source;
+        this(source, poi, null);
     }
 
     /**
@@ -53,5 +59,14 @@ public class PoiEvent {
      */
     public Object getSource() {
         return source;
+    }
+
+    /**
+     * Gets the exception of the event if any error was thrown.
+     * 
+     * @return The exception thrown.
+     */
+    public Exception getException() {
+        return exception;
     }
 }

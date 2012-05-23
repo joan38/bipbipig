@@ -32,21 +32,21 @@ public interface PoiListener extends EventListener {
     /**
      * Invoked when a POI is added.
      *
-     * @param e Event information.
+     * @param event Event information.
      */
-    void poiAdded(PoiEvent e);
+    public void poiAdded(PoiEvent event);
     
     /**
      * Invoked when a POI is updated.
      * 
-     * @param e Event information.
+     * @param event Event information.
      */
-    void poiUpdated(PoiEvent e);
+    public void poiUpdated(PoiEvent event);
 
     /**
      * Invoked when a POI is removed.
      *
-     * @param e Event information.
+     * @param event Event information.
      */
-    void poiRemoved(PoiEvent e);
+    public void poiRemoved(PoiEvent event);
 }
