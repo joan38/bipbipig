@@ -35,8 +35,9 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
  *
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
-public class ServerConnection {
+public class ServerCommunication {
 
+    private static final int CONNECTION_TIMEOUT = 10000;
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT);
     private final SocketAddress address;
     private SocketChannel channel;
@@ -59,34 +60,30 @@ public class ServerConnection {
         }
     }
 
-    public ServerConnection(SocketAddress address) {
+    public ServerCommunication(SocketAddress address) {
         Objects.requireNonNull(address);
-        
+
         this.address = address;
     }
 
     /**
      * Sumit a new POI to the server
      *
-     * A SUBMIT command is supposed to have the following form:
-     * SUBMIT <POI type> <latitude> <longitude> <date> <nb confirmation>
-     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * A SUBMIT command is supposed to have the following form: SUBMIT <POI
+     * type> <latitude> <longitude> <date> <nb confirmation> <date> =
+     * yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param poi
      * @throws IOException
      */
     public void submit(Poi poi) throws IOException {
         Objects.requireNonNull(poi);
-        
+
         if (channel == null || !channel.isConnected()) {
-            try {
-                channel = SocketChannel.open(address);
-            } catch (IOException e) {
-                throw new IOException("Unable to connect to the server", e);
-            }
+            connect();
         }
 
-        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + " " +  poi.getConfirmations() + "\n";
+        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + " " + poi.getConfirmations() + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
@@ -98,9 +95,8 @@ public class ServerConnection {
     /**
      * Declare a not seen POI to the server
      *
-     * A NOT_SEEN command is supposed to have the following form:
-     * NOT_SEEN <POI type> <latitude> <longitude> <date>
-     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * A NOT_SEEN command is supposed to have the following form: NOT_SEEN <POI
+     * type> <latitude> <longitude> <date> <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param poi
      * @throws IOException
@@ -109,13 +105,9 @@ public class ServerConnection {
         Objects.requireNonNull(poi);
 
         if (channel == null || !channel.isConnected()) {
-            try {
-                channel = SocketChannel.open(address);
-            } catch (IOException e) {
-                throw new IOException("Unable to connect to the server", e);
-            }
+            connect();
         }
-        
+
         String cmd = "NOT_SEEN " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
@@ -128,16 +120,13 @@ public class ServerConnection {
     /**
      * Get all POI around the coordinate from the server
      *
-     * A INFOS command is supposed to have the following form:
-     * INFOS N
-     * <line 1>
-     * ...
-     * <line N>
+     * A INFOS command is supposed to have the following form: INFOS N <line 1>
+     * ... <line N>
      *
      * where N is the number of lines of information. Each line is of the form:
      *
-     * <line N> = INFO <POI type> <latitude> <longitude> <date> <nb confirmation>
-     * <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
+     * <line N> = INFO <POI type> <latitude> <longitude> <date> <nb
+     * confirmation> <date> = yyyy-MM-dd'T'HH:mm:ss.SSSZ
      *
      * @param coordinate
      * @return
@@ -147,13 +136,9 @@ public class ServerConnection {
         Objects.requireNonNull(coordinate);
 
         if (channel == null || !channel.isConnected()) {
-            try {
-                channel = SocketChannel.open(address);
-            } catch (IOException e) {
-                throw new IOException("No connection", e);
-            }
+            connect();
         }
-        
+
         String cmd = "GET_INFOS " + coordinate.getLat() + " " + coordinate.getLon() + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
@@ -209,5 +194,14 @@ public class ServerConnection {
         }
 
         return pois;
+    }
+
+    public void connect() throws IOException {
+        try {
+            channel = SocketChannel.open(address);
+            channel.socket().setSoTimeout(CONNECTION_TIMEOUT);
+        } catch (IOException e) {
+            throw new IOException("Unable to connect to the server", e);
+        }
     }
 }

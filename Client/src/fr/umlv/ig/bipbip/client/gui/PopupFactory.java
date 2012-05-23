@@ -46,14 +46,12 @@ public final class PopupFactory {
      * @param coordinate
      * @param model
      * @param map
-     * @param infos
      * @return
      */
-    public static JPopupMenu getMapPopupMenu(Coordinate coordinate, ServerPoiModel model, final JMapViewer map, JLabel infos) {
+    public static JPopupMenu getMapPopupMenu(Coordinate coordinate, ServerPoiModel model, final JMapViewer map) {
         Objects.requireNonNull(coordinate);
         Objects.requireNonNull(model);
         Objects.requireNonNull(map);
-        Objects.requireNonNull(infos);
 
         JPopupMenu mapPopupMenu = new JPopupMenu();
         JLabel signaler = new JLabel("Signaler");
@@ -65,18 +63,17 @@ public final class PopupFactory {
         PoiType[] types = PoiType.values();
         for (PoiType type : types) {
             JMenuItem poiDeclarationItem = new JMenuItem(type.toString(), PoiImageFactory.getImage(type));
-            poiDeclarationItem.addActionListener(ListenerFactory.getSubmitButtonListener(coordinate, type, model, map, infos));
+            poiDeclarationItem.addActionListener(ListenerFactory.getSubmitButtonListener(coordinate, type, model, map));
             mapPopupMenu.add(poiDeclarationItem);
         }
 
         return mapPopupMenu;
     }
 
-    public static JPopupMenu getPoiPopupMenu(Poi poi, ServerPoiModel model, final JMapViewer map, JLabel infos) {
+    public static JPopupMenu getPoiPopupMenu(Poi poi, ServerPoiModel model, final JMapViewer map) {
         Objects.requireNonNull(poi);
         Objects.requireNonNull(model);
         Objects.requireNonNull(map);
-        Objects.requireNonNull(infos);
 
         JPopupMenu popupMenu = new JPopupMenu();
         JLabel signaler = new JLabel(poi.getType().toString());
@@ -86,11 +83,11 @@ public final class PopupFactory {
         popupMenu.add(new JSeparator());
 
         JMenuItem confirmation = new JMenuItem("Confirm", ImageFactory.getImage("confirm.png"));
-        confirmation.addActionListener(ListenerFactory.getConfirmationButtonListener(poi, model, map, infos));
+        confirmation.addActionListener(ListenerFactory.getConfirmationButtonListener(poi, model, map));
         popupMenu.add(confirmation);
 
         JMenuItem refutation = new JMenuItem("Not seen", ImageFactory.getImage("delete.png"));
-        refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, map, infos));
+        refutation.addActionListener(ListenerFactory.getNotSeenButtonListener(poi, model, map));
         popupMenu.add(refutation);
 
         return popupMenu;

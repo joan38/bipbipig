@@ -16,14 +16,12 @@
  */
 package fr.umlv.ig.bipbip.client.gui;
 
+import fr.umlv.ig.bipbip.client.model.PoiListener;
 import fr.umlv.ig.bipbip.client.model.PoiModel;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
-import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
 /**
@@ -35,7 +33,7 @@ public final class JMap extends JMapViewer implements PoiListener {
     PoiModel model;
     HashMap<Poi, JPoi> poiToJPOI = new HashMap<Poi, JPoi>();
 
-    public JMap(PoiModel model) {
+    public JMap(final PoiModel model) {
         super();
         Objects.requireNonNull(model);
 

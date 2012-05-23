@@ -16,31 +16,24 @@
  */
 package fr.umlv.ig.bipbip.client.model;
 
-import fr.umlv.ig.bipbip.poi.Poi;
-import java.util.Collection;
+import fr.umlv.ig.bipbip.poi.PoiEvent;
+import java.util.EventListener;
 
 /**
  *
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
-public interface PoiModel {
+public interface PoiCommunicationListener extends EventListener {
 
-    /**
-     * Gets all POIs.
-     */
-    public Collection<Poi> getAll();
+    public void poiSubmited(PoiEvent event);
+    
+    public void poiDeclaredAsNotSeen(PoiEvent event);
+    
+    public void poisUpdated(PoiEvent event);
+    
+    public void unableToSubmitPoi(PoiEvent event);
 
-    /**
-     * Adds a POI listener to the collection.
-     *
-     * @param listener The POIListener to be added.
-     */
-    public void addPoiListener(PoiListener listener);
+    public void unableToDeclarPoiAsNotSeen(PoiEvent event);
 
-    /**
-     * Removes a POI listener from the collection.
-     *
-     * @param listener The POIListener to be removed.
-     */
-    public void removePoiListener(PoiListener listener);
+    public void unableToUpdatePois(PoiEvent event);
 }

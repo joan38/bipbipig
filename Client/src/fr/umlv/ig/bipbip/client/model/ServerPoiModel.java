@@ -16,28 +16,30 @@
  */
 package fr.umlv.ig.bipbip.client.model;
 
-import fr.umlv.ig.bipbip.client.ServerConnection;
+import fr.umlv.ig.bipbip.client.ServerCommunication;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
-import fr.umlv.ig.bipbip.poi.PoiListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
+import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
 /**
  *
  * @author Joan Goyeau <joan.goyeau@gmail.com>
  */
-public class ServerPoiModel implements PoiModel {
+public class ServerPoiModel implements PoiModel, Runnable {
 
     private final ConcurrentLinkedQueue<Poi> pois = new ConcurrentLinkedQueue<Poi>();
-    private final ConcurrentLinkedQueue<PoiListener> listeners = new ConcurrentLinkedQueue<PoiListener>();
-    private final ServerConnection server;
+    private final ConcurrentLinkedQueue<PoiListener> poiListeners = new ConcurrentLinkedQueue<PoiListener>();
+    private final LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
+    private final ConcurrentLinkedQueue<PoiCommunicationListener> communicationListener = new ConcurrentLinkedQueue<PoiCommunicationListener>();
+    private final ServerCommunication server;
+    private final Timer timer = new Timer();
 
-    public ServerPoiModel(ServerConnection server) {
+    public ServerPoiModel(ServerCommunication server) {
         this.server = server;
     }
 
@@ -50,14 +52,26 @@ public class ServerPoiModel implements PoiModel {
     public void addPoiListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
-        listeners.add(listener);
+        poiListeners.add(listener);
     }
 
     @Override
     public void removePoiListener(PoiListener listener) {
         Objects.requireNonNull(listener);
 
-        listeners.remove(listener);
+        poiListeners.remove(listener);
+    }
+
+    public void addPoiCommunicationListener(PoiCommunicationListener listener) {
+        Objects.requireNonNull(listener);
+
+        communicationListener.add(listener);
+    }
+
+    public void removePoiCommunicationListener(PoiCommunicationListener listener) {
+        Objects.requireNonNull(listener);
+
+        communicationListener.remove(listener);
     }
 
     /**
@@ -68,7 +82,7 @@ public class ServerPoiModel implements PoiModel {
     protected void firePoiAdded(PoiEvent e) {
         Objects.requireNonNull(e);
 
-        for (PoiListener listener : listeners) {
+        for (PoiListener listener : poiListeners) {
             listener.poiAdded(e);
         }
     }
@@ -81,7 +95,7 @@ public class ServerPoiModel implements PoiModel {
     protected void firePoiRemoved(PoiEvent e) {
         Objects.requireNonNull(e);
 
-        for (PoiListener listener : listeners) {
+        for (PoiListener listener : poiListeners) {
             listener.poiRemoved(e);
         }
     }
@@ -113,41 +127,135 @@ public class ServerPoiModel implements PoiModel {
         firePoiRemoved(new PoiEvent(this, poi));
     }
     
-    public void update(Coordinate coordinate) throws IOException {
+    public void startAutoUpdating(final JMapViewer map, long updateInterval) {
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                try {
+                    update(map.getPosition());
+                } catch (InterruptedException e) {
+                    this.cancel();
+                }
+            }
+        }, 0, updateInterval);
+    }
+    
+    public void stopAutoUpdating() {
+        timer.cancel();
+    }
+
+    public void update(Coordinate coordinate) throws InterruptedException {
+        Objects.requireNonNull(coordinate);
+
+        tasks.put(new UpdateTask(coordinate));
+    }
+
+    public void submit(Poi poi) throws InterruptedException {
+        Objects.requireNonNull(poi);
+
+        tasks.put(new SubmitTask(poi));
+    }
+
+    public void notSeen(Poi poi) throws InterruptedException {
+        Objects.requireNonNull(poi);
+
+        tasks.put(new NotSeenTask(poi));
+    }
+
+    @Override
+    public void run() {
         try {
-            ArrayList<Poi> newPois = (ArrayList<Poi>) server.getPois(coordinate);
-            for (Poi poi : pois) {
-                if (!newPois.contains(poi)) {
-                    remove(poi);
-                }
+            while (!Thread.interrupted()) {
+                tasks.take().run();
             }
-            for (Poi poi : newPois) {
-                if (!pois.contains(poi)) {
-                    add(poi);
-                }
-            }
-        } catch (IOException e) {
-            throw new IOException("Connection problem: Unable to update POIs", e);
+        } catch (InterruptedException e) {
         }
     }
 
-    public void submit(Poi poi) throws IOException {
-        Objects.requireNonNull(poi);
+    private class SubmitTask implements Runnable {
+        
+        private final Poi poi;
 
-        try {
-            server.submit(poi);
-        } catch (IOException e) {
-            throw new IOException("Connection problem: Unable to submit the POI", e);
+        private SubmitTask(Poi poi) {
+            this.poi = poi;
+        }
+
+        @Override
+        public void run() {
+            try {
+                server.submit(poi);
+                PoiEvent event = new PoiEvent(this, poi);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.poiSubmited(event);
+                }
+            } catch (IOException e) {
+                PoiEvent event = new PoiEvent(this, poi, e);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.unableToSubmitPoi(event);
+                }
+            }
         }
     }
 
-    public void notSeen(Poi poi) throws IOException {
-        Objects.requireNonNull(poi);
+    private class NotSeenTask implements Runnable {
 
-        try {
-            server.notSeen(poi);
-        } catch (IOException e) {
-            throw new IOException("Connection problem: Unable to declare the POI as not seen", e);
+        private final Poi poi;
+        
+        private NotSeenTask(Poi poi) {
+            this.poi = poi;
+        }
+
+        @Override
+        public void run() {
+            try {
+                server.notSeen(poi);
+                PoiEvent event = new PoiEvent(this, poi);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.poiDeclaredAsNotSeen(event);
+                }
+            } catch (IOException e) {
+                PoiEvent event = new PoiEvent(this, poi, e);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.unableToDeclarPoiAsNotSeen(event);
+                }
+            }
+        }
+    }
+
+    private class UpdateTask implements Runnable {
+        
+        private final Coordinate coordinate;
+
+        private UpdateTask(Coordinate coordinate) {
+            this.coordinate = coordinate;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ArrayList<Poi> newPois = (ArrayList<Poi>) server.getPois(coordinate);
+                for (Poi poi : pois) {
+                    if (!newPois.contains(poi)) {
+                        remove(poi);
+                    }
+                }
+                for (Poi poi : newPois) {
+                    if (!pois.contains(poi)) {
+                        add(poi);
+                    }
+                }
+                
+                PoiEvent event = new PoiEvent(this, null);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.poisUpdated(event);
+                }
+            } catch (IOException e) {
+                PoiEvent event = new PoiEvent(this, null, e);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.unableToUpdatePois(event);
+                }
+            }
         }
     }
 }
