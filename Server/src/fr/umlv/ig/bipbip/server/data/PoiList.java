@@ -19,6 +19,7 @@ package fr.umlv.ig.bipbip.server.data;
 import fr.umlv.ig.bipbip.poi.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.swing.SwingUtilities;
 
 /**
  * Generic collection of point of interests.
@@ -98,8 +99,8 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePoiAdded(PoiEvent e) {
-        for (PoiListener listener : listeners) {
+    protected void firePoiAdded(final PoiEvent e) {
+        for (final PoiListener listener : listeners) {
             listener.poiAdded(e);
         }
     }
@@ -109,8 +110,8 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePoiUpdated(PoiEvent e) {
-        for (PoiListener listener : listeners) {
+    protected void firePoiUpdated(final PoiEvent e) {
+        for (final PoiListener listener : listeners) {
             listener.poiUpdated(e);
         }
     }
@@ -120,8 +121,8 @@ public class PoiList {
      *
      * @param e Event.
      */
-    protected void firePoiRemoved(PoiEvent e) {
-        for (PoiListener listener : listeners) {
+    protected void firePoiRemoved(final PoiEvent e) {
+        for (final PoiListener listener : listeners) {
             listener.poiRemoved(e);
         }
     }
@@ -252,7 +253,7 @@ public class PoiList {
                 }
             }
         }
-        
+
         synchronized (removedPoints) {
             for (Poi poi : removedPoints) {
                 if (poi.getDate().compareTo(date) <= 0 && poi.getRemovedDate().compareTo(date) >= 0) {

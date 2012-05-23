@@ -20,7 +20,8 @@ import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
-import fr.umlv.ig.bipbip.server.Server;
+import fr.umlv.ig.bipbip.server.communication.Server;
+import fr.umlv.ig.bipbip.server.data.PoiActiveTableModel;
 import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -720,7 +721,8 @@ public class ServerJFrame extends JFrame {
             StringBuilder sb = new StringBuilder();
             sb.append(logRecord.getLevel()).append(": ");
             sb.append(dateFormatter.format(new Date(logRecord.getMillis()))).append(" - ");
-            sb.append(logRecord.getLoggerName()).append(": ");
+            String loggerName = logRecord.getSourceClassName();
+            sb.append(loggerName != null ? loggerName.substring(loggerName.lastIndexOf('.') + 1) : "").append(": ");
             sb.append(logRecord.getMessage());
 
             Component result = super.getListCellRendererComponent(list, sb.toString(), index, isSelected, cellHasFocus);

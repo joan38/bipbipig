@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.server;
+package fr.umlv.ig.bipbip.server.communication;
 
+import fr.umlv.ig.bipbip.server.communication.ServerCommunication;
 import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.io.IOException;
 import java.net.InetSocketAddress;

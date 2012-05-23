@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.server.gui;
+package fr.umlv.ig.bipbip.server.data;
 
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.PoiListener;
 import fr.umlv.ig.bipbip.poi.PoiType;
-import fr.umlv.ig.bipbip.server.data.PoiList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

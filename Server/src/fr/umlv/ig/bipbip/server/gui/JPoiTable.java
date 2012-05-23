@@ -17,6 +17,7 @@
 package fr.umlv.ig.bipbip.server.gui;
 
 import fr.umlv.ig.bipbip.poi.Poi;
+import fr.umlv.ig.bipbip.server.data.PoiTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.text.DateFormat;
@@ -48,6 +49,7 @@ public class JPoiTable extends JTable {
     public JPoiTable(JMapViewer map, PoiTableModel dm) {
         super(dm);
         Objects.requireNonNull(map);
+        Objects.requireNonNull(dm);
 
         this.map = map;
 
@@ -58,15 +60,17 @@ public class JPoiTable extends JTable {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 String text = "Active";
-                if (value != null)
+                if (value != null) {
                     text = DateFormat.getDateTimeInstance().format((Date) value);
+                }
                 Component tableCellRendererComponent = super.getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
-                
-                if (value == null)
+
+                if (value == null) {
                     tableCellRendererComponent.setForeground(Color.green.darker());
-                else
+                } else {
                     tableCellRendererComponent.setForeground(Color.black);
-                
+                }
+
                 return tableCellRendererComponent;
             }
         });

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.umlv.ig.bipbip.server;
+package fr.umlv.ig.bipbip.server.communication;
 
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiType;
@@ -89,6 +89,14 @@ public enum ClientCommandHandler {
             logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
 
             poiList.addPoi(type.constructPoi(latitude, longitude, date, confirmations));
+            
+            
+            
+            try {
+                Thread.sleep(11000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ClientCommandHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     },
     NOT_SEEN {

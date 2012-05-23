@@ -16,6 +16,7 @@
  */
 package fr.umlv.ig.bipbip.server.gui;
 
+import fr.umlv.ig.bipbip.server.data.PoiHistoryTableModel;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
 import fr.umlv.ig.bipbip.server.data.PoiList;
@@ -140,7 +141,7 @@ public class PoiHistoryJFrame extends JFrame {
         if (updateSlider) {
             long minDate = model.getFirstPoiDate().getTime();
             long currentDate = ((Date) dateField.getValue()).getTime();
-            long maxDate = (new Date()).getTime();
+            long maxDate = new Date().getTime();
 
             double newPosition = ((currentDate - minDate) * 100) / (maxDate - minDate);
 

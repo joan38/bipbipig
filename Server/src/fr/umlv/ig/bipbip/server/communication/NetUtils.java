@@ -1,4 +1,4 @@
-package fr.umlv.ig.bipbip.server;
+package fr.umlv.ig.bipbip.server.communication;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
