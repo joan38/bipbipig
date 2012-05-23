@@ -86,7 +86,7 @@ public class BipbipServer {
          * Our protocol requires that we work with the US locale for both
          * doubles and dates
          */
-        Locale.setDefault(Locale.US);
+        Locale.setDefault(Locale.ROOT);
         Server server = new Server(port);
 
         // Some dummy points.

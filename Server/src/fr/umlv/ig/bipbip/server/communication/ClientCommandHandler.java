@@ -89,14 +89,6 @@ public enum ClientCommandHandler {
             logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
 
             poiList.addPoi(type.constructPoi(latitude, longitude, date, confirmations));
-            
-            
-            
-            try {
-                Thread.sleep(11000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ClientCommandHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
     },
     NOT_SEEN {
