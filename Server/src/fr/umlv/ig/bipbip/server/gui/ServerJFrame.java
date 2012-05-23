@@ -636,6 +636,7 @@ public class ServerJFrame extends JFrame {
 
         @Override
         public void poiUpdated(PoiEvent e) {
+            map.repaint();
         }
 
         @Override
