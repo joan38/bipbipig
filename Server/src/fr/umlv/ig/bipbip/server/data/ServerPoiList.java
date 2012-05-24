@@ -70,7 +70,7 @@ public class ServerPoiList extends PoiList {
             if (newRefutations >= NB_REFUTATION_FOR_DELETE) {
                 removePoi(p);
             } else {
-                p.setNbNotSeen(newRefutations);
+                p.setRefutations(newRefutations);
                 firePoiUpdated(new PoiEvent(this, p));
             }
         }
@@ -220,7 +220,7 @@ public class ServerPoiList extends PoiList {
                     } else if (reader.getLocalName().equals("confirmations")) {
                         currentPoi.setConfirmations(Integer.parseInt(reader.getElementText()));
                     } else if (reader.getLocalName().equals("refutations")) {
-                        currentPoi.setNbNotSeen(Integer.parseInt(reader.getElementText()));
+                        currentPoi.setRefutations(Integer.parseInt(reader.getElementText()));
                     } else if (reader.getLocalName().equals("removedDate")) {
                         currentPoi.setRemovedDate(dateFormat.parse(reader.getElementText()));
                     }

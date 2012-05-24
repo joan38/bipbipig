@@ -16,9 +16,9 @@
  */
 package fr.umlv.ig.bipbip.server.gui;
 
-import fr.umlv.ig.bipbip.server.data.PoiHistoryTableModel;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
+import fr.umlv.ig.bipbip.server.data.PoiHistoryTableModel;
 import fr.umlv.ig.bipbip.server.data.PoiList;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;

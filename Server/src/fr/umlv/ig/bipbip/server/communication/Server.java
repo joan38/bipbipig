@@ -16,7 +16,6 @@
  */
 package fr.umlv.ig.bipbip.server.communication;
 
-import fr.umlv.ig.bipbip.server.communication.ServerCommunication;
 import fr.umlv.ig.bipbip.server.data.ServerPoiList;
 import java.io.IOException;
 import java.net.InetSocketAddress;

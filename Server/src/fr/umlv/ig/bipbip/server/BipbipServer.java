@@ -16,11 +16,11 @@
  */
 package fr.umlv.ig.bipbip.server;
 
-import fr.umlv.ig.bipbip.server.communication.Server;
-import fr.umlv.ig.bipbip.server.communication.ServerCommunication;
 import fr.umlv.ig.bipbip.poi.defined.FixedSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.MobileSpeedCam;
 import fr.umlv.ig.bipbip.poi.defined.RoadWorks;
+import fr.umlv.ig.bipbip.server.communication.Server;
+import fr.umlv.ig.bipbip.server.communication.ServerCommunication;
 import fr.umlv.ig.bipbip.server.gui.ServerJFrame;
 import java.io.IOException;
 import java.util.ArrayList;

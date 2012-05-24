@@ -331,7 +331,7 @@ public class PoiEditJFrame extends JDialog {
                 (Date) dateField.getValue());
         
         newPoi.setConfirmations((Integer)confirmationSpinner.getValue());
-        newPoi.setNbNotSeen((Integer)refusedSpinner.getValue());
+        newPoi.setRefutations((Integer)refusedSpinner.getValue());
         
         return newPoi;
     }

@@ -19,7 +19,6 @@ package fr.umlv.ig.bipbip.server.data;
 import fr.umlv.ig.bipbip.poi.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import javax.swing.SwingUtilities;
 
 /**
  * Generic collection of point of interests.
