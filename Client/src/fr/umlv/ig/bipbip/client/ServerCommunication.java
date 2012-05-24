@@ -204,4 +204,12 @@ public class ServerCommunication {
             throw new IOException("Unable to connect to the server", e);
         }
     }
+    
+    public void close() throws IOException {
+        if (channel != null) {
+            channel.close();
+        } else {
+            throw new IOException("Channel already closed");
+        }
+    }
 }

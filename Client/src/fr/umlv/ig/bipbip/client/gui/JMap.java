@@ -21,7 +21,9 @@ import fr.umlv.ig.bipbip.client.model.PoiModel;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import fr.umlv.ig.bipbip.poi.swing.JPoi;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Objects;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
 /**

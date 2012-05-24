@@ -32,7 +32,7 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer;
  */
 public class ServerPoiModel implements PoiModel, Runnable {
 
-    private final ConcurrentLinkedQueue<Poi> pois = new ConcurrentLinkedQueue<Poi>();
+    private ConcurrentLinkedQueue<Poi> pois = new ConcurrentLinkedQueue<Poi>();
     private final ConcurrentLinkedQueue<PoiListener> poiListeners = new ConcurrentLinkedQueue<PoiListener>();
     private final LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
     private final ConcurrentLinkedQueue<PoiCommunicationListener> communicationListener = new ConcurrentLinkedQueue<PoiCommunicationListener>();
@@ -77,26 +77,39 @@ public class ServerPoiModel implements PoiModel, Runnable {
     /**
      * Fires the listeners when a POI is added.
      *
-     * @param e Event.
+     * @param event Event.
      */
-    protected void firePoiAdded(PoiEvent e) {
-        Objects.requireNonNull(e);
+    protected void firePoiAdded(PoiEvent event) {
+        Objects.requireNonNull(event);
 
         for (PoiListener listener : poiListeners) {
-            listener.poiAdded(e);
+            listener.poiAdded(event);
         }
     }
 
     /**
      * Fires the listeners when a POI is removed.
      *
-     * @param e Event.
+     * @param event Event.
      */
-    protected void firePoiRemoved(PoiEvent e) {
-        Objects.requireNonNull(e);
+    protected void firePoiRemoved(PoiEvent event) {
+        Objects.requireNonNull(event);
 
         for (PoiListener listener : poiListeners) {
-            listener.poiRemoved(e);
+            listener.poiRemoved(event);
+        }
+    }
+
+    /**
+     * Fires the listeners when a POI is updated.
+     *
+     * @param event Event.
+     */
+    protected void firePoiUpdated(PoiEvent event) {
+        Objects.requireNonNull(event);
+
+        for (PoiListener listener : poiListeners) {
+            listener.poiUpdated(event);
         }
     }
 
@@ -108,11 +121,17 @@ public class ServerPoiModel implements PoiModel, Runnable {
      *
      * @param p POI to add.
      */
-    public void add(Poi poi) {
+    public void addPoi(Poi poi) {
         Objects.requireNonNull(poi);
 
         pois.add(poi);
         firePoiAdded(new PoiEvent(this, poi));
+    }
+
+    public void updatePoi(Poi poi, Poi newPoi) {
+        poi.setConfirmations(newPoi.getConfirmations());
+        poi.setRefutations(newPoi.getRefutations());
+        firePoiUpdated(new PoiEvent(this, poi));
     }
 
     /**
@@ -120,13 +139,13 @@ public class ServerPoiModel implements PoiModel, Runnable {
      *
      * @param p POI to add.
      */
-    public void remove(Poi poi) {
+    public void removePoi(Poi poi) {
         Objects.requireNonNull(poi);
 
         pois.remove(poi);
         firePoiRemoved(new PoiEvent(this, poi));
     }
-    
+
     public void startAutoUpdating(final JMapViewer map, long updateInterval) {
         timer.schedule(new TimerTask() {
 
@@ -140,7 +159,7 @@ public class ServerPoiModel implements PoiModel, Runnable {
             }
         }, 0, updateInterval);
     }
-    
+
     public void stopAutoUpdating() {
         timer.cancel();
     }
@@ -174,7 +193,7 @@ public class ServerPoiModel implements PoiModel, Runnable {
     }
 
     private class SubmitTask implements Runnable {
-        
+
         private final Poi poi;
 
         private SubmitTask(Poi poi) {
@@ -201,7 +220,7 @@ public class ServerPoiModel implements PoiModel, Runnable {
     private class NotSeenTask implements Runnable {
 
         private final Poi poi;
-        
+
         private NotSeenTask(Poi poi) {
             this.poi = poi;
         }
@@ -224,7 +243,7 @@ public class ServerPoiModel implements PoiModel, Runnable {
     }
 
     private class UpdateTask implements Runnable {
-        
+
         private final Coordinate coordinate;
 
         private UpdateTask(Coordinate coordinate) {
@@ -235,14 +254,29 @@ public class ServerPoiModel implements PoiModel, Runnable {
         public void run() {
             try {
                 ArrayList<Poi> newPois = (ArrayList<Poi>) server.getPois(coordinate);
+                
+                // Delete each old POI
                 for (Poi poi : pois) {
                     if (!newPois.contains(poi)) {
-                        remove(poi);
+                        removePoi(poi);
                     }
                 }
-                for (Poi poi : newPois) {
-                    if (!pois.contains(poi)) {
-                        add(poi);
+                
+                // Add or update each new POI
+                for (Poi newPoi : newPois) {
+                    boolean found = false;
+                    for (Poi poi : pois) {
+                        if (newPoi.equals(poi)) {
+                            if (newPoi.getConfirmations() != poi.getConfirmations()
+                                    || newPoi.getRefutations() != poi.getRefutations()) {
+                                updatePoi(poi, newPoi);
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        addPoi(newPoi);
                     }
                 }
                 

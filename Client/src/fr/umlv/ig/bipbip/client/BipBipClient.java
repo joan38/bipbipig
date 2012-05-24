@@ -89,17 +89,7 @@ public final class BipBipClient extends JFrame implements PoiCommunicationListen
                 frame.setVisible(false);
                 model.stopAutoUpdating();
                 thread.interrupt();
-                
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        if (thread.isInterrupted()) {
-                            System.exit(0);
-                        }
-                    }
-                }, 1, 1000);
+                System.exit(0);
             }
         });
         frame.setVisible(true);
@@ -110,7 +100,6 @@ public final class BipBipClient extends JFrame implements PoiCommunicationListen
         super(TITLE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((screenSize.width - FRAME_WIDTH) / 2, (screenSize.height - FRAME_HEIGHT) / 2, FRAME_WIDTH, FRAME_HEIGHT);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(new LayeredLayoutManager());
