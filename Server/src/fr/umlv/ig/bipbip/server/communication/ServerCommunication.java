@@ -96,8 +96,6 @@ public class ServerCommunication implements Runnable {
                     continue;
                 }
             }
-
-
         }
     }
 

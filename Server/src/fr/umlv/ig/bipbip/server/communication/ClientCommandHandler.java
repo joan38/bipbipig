@@ -84,7 +84,6 @@ public enum ClientCommandHandler {
                 e.printStackTrace();
                 throw new IOException("Invalid date: " + d);
             }
-            int confirmations = scanner.nextInt();
 
             logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date));
 
@@ -160,11 +159,11 @@ public enum ClientCommandHandler {
         public void handle(SocketChannel sc, Scanner scanner, ServerPoiList poiList) throws IOException {
             double latitude, longitude;
             if (!scanner.hasNextDouble()) {
-                throw new IOException("Missing X coordinate");
+                throw new IOException("Missing latitude coordinate");
             }
             latitude = scanner.nextDouble();
             if (!scanner.hasNextDouble()) {
-                throw new IOException("Missing Y coordinate");
+                throw new IOException("Missing longitude coordinate");
             }
             longitude = scanner.nextDouble();
             /*
