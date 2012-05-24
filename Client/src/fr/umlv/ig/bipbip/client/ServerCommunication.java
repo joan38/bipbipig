@@ -83,7 +83,7 @@ public class ServerCommunication {
             connect();
         }
 
-        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + " " + poi.getConfirmations() + "\n";
+        String cmd = "SUBMIT " + poi.getType().name() + " " + poi.getLat() + " " + poi.getLon() + " " + dateFormat.format(poi.getDate()) + "\n";
         try {
             channel.write(ByteBuffer.wrap(cmd.getBytes()));
         } catch (IOException e) {
