@@ -89,6 +89,7 @@ public class JPoi implements MapMarker {
         } else if (confirmations < 100) {
             g.drawImage(ImageFactory.getImage("pastil_2_digit.png").getImage(), x, y, null);
         } else {
+            g.drawImage(ImageFactory.getImage("pastil_2_digit.png").getImage(), x, y, null);
             confirmations = 99;
         }
         
