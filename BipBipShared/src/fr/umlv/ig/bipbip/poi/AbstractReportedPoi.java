@@ -141,7 +141,7 @@ public abstract class AbstractReportedPoi implements Poi {
      * @param refutations The number of refuses.
      */
     @Override
-    public void setNbNotSeen(int refutations) {
+    public void setRefutations(int refutations) {
         this.refutations = refutations;
     }
 
@@ -186,12 +186,6 @@ public abstract class AbstractReportedPoi implements Poi {
         if (this.date != other.date && (this.date == null || !this.date.equals(other.date))) {
             return false;
         }
-        if (this.confirmations != other.confirmations) {
-            return false;
-        }
-        if (this.refutations != other.refutations) {
-            return false;
-        }
         return true;
     }
 
@@ -202,8 +196,6 @@ public abstract class AbstractReportedPoi implements Poi {
         hash = 29 * hash + (int) (Double.doubleToLongBits(this.longitude) ^ (Double.doubleToLongBits(this.longitude) >>> 32));
         hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
         hash = 29 * hash + (this.date != null ? this.date.hashCode() : 0);
-        hash = 29 * hash + this.confirmations;
-        hash = 29 * hash + this.refutations;
         return hash;
     }
 

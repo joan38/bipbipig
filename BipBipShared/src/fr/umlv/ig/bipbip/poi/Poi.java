@@ -79,7 +79,7 @@ public interface Poi {
      * 
      * @param refutations The number of refuses.
      */
-    void setNbNotSeen(int refutations);
+    void setRefutations(int refutations);
     
     /**
      * Gets the date when the Poi is removed.
