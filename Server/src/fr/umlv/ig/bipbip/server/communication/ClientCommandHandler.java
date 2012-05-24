@@ -86,9 +86,9 @@ public enum ClientCommandHandler {
             }
             int confirmations = scanner.nextInt();
 
-            logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date) + " " + confirmations);
+            logger.log(Level.INFO, "CLIENT: SUBMIT " + type.name() + " " + latitude + " " + longitude + " " + NetUtils.getDateformat().format(date));
 
-            poiList.addPoi(type.constructPoi(latitude, longitude, date, confirmations));
+            poiList.addPoi(type.constructPoi(latitude, longitude, date));
         }
     },
     NOT_SEEN {
