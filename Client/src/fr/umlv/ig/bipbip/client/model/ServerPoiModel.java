@@ -20,6 +20,7 @@ import fr.umlv.ig.bipbip.client.ServerCommunication;
 import fr.umlv.ig.bipbip.poi.Poi;
 import fr.umlv.ig.bipbip.poi.PoiEvent;
 import java.io.IOException;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -197,6 +198,8 @@ public class ServerPoiModel implements PoiModel, Runnable {
         private final Poi poi;
 
         private SubmitTask(Poi poi) {
+            Objects.requireNonNull(poi);
+            
             this.poi = poi;
         }
 
@@ -222,6 +225,8 @@ public class ServerPoiModel implements PoiModel, Runnable {
         private final Poi poi;
 
         private NotSeenTask(Poi poi) {
+            Objects.requireNonNull(poi);
+            
             this.poi = poi;
         }
 
@@ -247,6 +252,8 @@ public class ServerPoiModel implements PoiModel, Runnable {
         private final Coordinate coordinate;
 
         private UpdateTask(Coordinate coordinate) {
+            Objects.requireNonNull(coordinate);
+            
             this.coordinate = coordinate;
         }
 
@@ -254,14 +261,14 @@ public class ServerPoiModel implements PoiModel, Runnable {
         public void run() {
             try {
                 ArrayList<Poi> newPois = (ArrayList<Poi>) server.getPois(coordinate);
-                
+
                 // Delete each old POI
                 for (Poi poi : pois) {
                     if (!newPois.contains(poi)) {
                         removePoi(poi);
                     }
                 }
-                
+
                 // Add or update each new POI
                 for (Poi newPoi : newPois) {
                     boolean found = false;
@@ -279,13 +286,18 @@ public class ServerPoiModel implements PoiModel, Runnable {
                         addPoi(newPoi);
                     }
                 }
-                
+
                 PoiEvent event = new PoiEvent(this, null);
                 for (PoiCommunicationListener listener : communicationListener) {
                     listener.poisUpdated(event);
                 }
             } catch (IOException e) {
                 PoiEvent event = new PoiEvent(this, null, e);
+                for (PoiCommunicationListener listener : communicationListener) {
+                    listener.unableToUpdatePois(event);
+                }
+            } catch (UnresolvedAddressException e) {
+                PoiEvent event = new PoiEvent(this, null, new IOException("Unable to resolve the server address", e));
                 for (PoiCommunicationListener listener : communicationListener) {
                     listener.unableToUpdatePois(event);
                 }

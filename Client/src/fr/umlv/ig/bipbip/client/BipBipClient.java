@@ -33,8 +33,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.*;
 
 /**

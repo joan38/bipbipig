@@ -109,13 +109,14 @@ public final class PopupFactory {
             return new InetSocketAddress(split[0], Integer.parseInt(split[1]));
         } else if (input.matches("[^\\s:]+")) {
             return new InetSocketAddress(input, defaultPort);
-        } else {
-            JOptionPane.showMessageDialog(null,
-                    "Invalid host",
-                    "Error",
-                    JOptionPane.INFORMATION_MESSAGE,
-                    ImageFactory.getImage("delete.png"));
-            return requestConnectionAddress(defaultPort);
         }
+
+        JOptionPane.showMessageDialog(
+                null,
+                "Unresolved Address",
+                "Error",
+                JOptionPane.ERROR_MESSAGE,
+                ImageFactory.getImage("delete.png"));
+        return requestConnectionAddress(defaultPort);
     }
 }
