@@ -22,6 +22,7 @@ import fr.umlv.ig.bipbip.poi.PoiType;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,7 +79,7 @@ public class ServerPoiList extends PoiList {
     /**
      * Version of the xml file.
      */
-    private static final Integer xmlVersion = 1;
+    private static final Integer XML_VERSION = 1;
 
     /**
      * Adds a POI.
@@ -118,7 +119,7 @@ public class ServerPoiList extends PoiList {
         writer.writeStartDocument("UTF-8", "1.0");
 
         writer.writeStartElement("points");
-        writer.writeAttribute("version", xmlVersion.toString());
+        writer.writeAttribute("version", XML_VERSION.toString());
 
         // Date formatter.
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
@@ -163,7 +164,7 @@ public class ServerPoiList extends PoiList {
         }
     }
 
-    public static ServerPoiList readFromFile(FileInputStream input) throws XMLStreamException, Exception {
+    public static ServerPoiList readFromFile(FileInputStream input) throws XMLStreamException, XMLDatabaseException {
         ServerPoiList poiList = new ServerPoiList();
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -176,15 +177,14 @@ public class ServerPoiList extends PoiList {
         // As this fckin StaX does not support XSD, and I do not have the time to
         // rewrite everything, I do some sanity check in this code.
         while (reader.hasNext()) {
-            int eventType = reader.next();
-            switch (eventType) {
+            switch (reader.next()) {
                 case XMLStreamConstants.START_ELEMENT:
                     if (reader.getLocalName().equals("points")) {
                         for (int i = 0; i < reader.getAttributeCount(); i++) {
                             if (reader.getAttributeLocalName(i).equals("version")) {
                                 // Checking version.
-                                if (reader.getAttributeValue(i).equals(xmlVersion.toString()) == false) {
-                                    throw new Exception("Invalid file version! Found: " + reader.getAttributeValue(i) + " Expected: " + xmlVersion.toString());
+                                if (reader.getAttributeValue(i).equals(XML_VERSION.toString()) == false) {
+                                    throw new XMLDatabaseException("Invalid file version! Found: " + reader.getAttributeValue(i) + " Expected: " + XML_VERSION.toString());
                                 }
                             }
                         }
@@ -200,7 +200,11 @@ public class ServerPoiList extends PoiList {
                             } else if (reader.getAttributeLocalName(i).equals("longitude")) {
                                 longitude = Double.parseDouble(reader.getAttributeValue(i));
                             } else if (reader.getAttributeLocalName(i).equals("date")) {
-                                date = dateFormat.parse(reader.getAttributeValue(i));
+                                try {
+                                    date = dateFormat.parse(reader.getAttributeValue(i));
+                                } catch (ParseException e) {
+                                    throw new XMLDatabaseException("Unparsable date format " + reader.getAttributeValue(i), e);
+                                }
                             } else if (reader.getAttributeLocalName(i).equals("type")) {
                                 poiType = Enum.valueOf(PoiType.class, reader.getAttributeValue(i));
                             }
@@ -209,10 +213,10 @@ public class ServerPoiList extends PoiList {
                         // Woot, the beautiful non understandable error message.
                         // Can be translated: You're fucked :)
                         if (poiType == null) {
-                            throw new Exception("Type undefined");
+                            throw new XMLDatabaseException("Type undefined");
                         }
                         if (date == null) {
-                            throw new Exception("Date undefined");
+                            throw new XMLDatabaseException("Date undefined");
                         }
 
                         // Everything is created.
@@ -222,7 +226,11 @@ public class ServerPoiList extends PoiList {
                     } else if (reader.getLocalName().equals("refutations")) {
                         currentPoi.setRefutations(Integer.parseInt(reader.getElementText()));
                     } else if (reader.getLocalName().equals("removedDate")) {
-                        currentPoi.setRemovedDate(dateFormat.parse(reader.getElementText()));
+                        try {
+                            currentPoi.setRemovedDate(dateFormat.parse(reader.getElementText()));
+                        } catch (ParseException e) {
+                            throw new XMLDatabaseException("Unparsable date format " + reader.getElementText(), e);
+                        }
                     }
                     break;
                 case XMLStreamConstants.END_ELEMENT:
@@ -235,7 +243,6 @@ public class ServerPoiList extends PoiList {
                         currentPoi = null;
                     }
                     break;
-                //case XMLStreamConstants.CHARACTERS:
             }
         }
 
